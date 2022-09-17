@@ -2,7 +2,7 @@ import { ParsedToken } from '@root/engine/types';
 import { repeat } from '@root/utils/misc';
 import React from 'react';
 
-import './token.css';
+import './token.scss';
 
 export type TokenProps = ParsedToken;
 

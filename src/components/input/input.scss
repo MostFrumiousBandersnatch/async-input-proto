@@ -1,10 +1,34 @@
 @import 'src/styles/meta';
 
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(90deg);
+  }
+
+  50% {
+    transform: rotate(180deg);
+  }
+
+  75% {
+    transform: rotate(270deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .async-input {
   position: relative;
   height: $input-height;
-  border: 1px solid dimgrey;
+  border: 1px solid $input-border-color;
+  border-radius: 2px;
 
+  // spinner
   &::after {
     content: '';
     position: absolute;
@@ -25,10 +49,12 @@
     animation-iteration-count: infinite;
     animation-timing-function: linear;
 
+    display: none;
     opacity: 0;
   }
 
   &.loading::after {
+    display: block;
     opacity: 0.5;
     transition-property: opacity;
     transition-duration: 0.1s;
@@ -53,27 +79,10 @@
 
 input.layer {
   display: block;
-  opacity: 0.5;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  25% {
-    transform: rotate(90deg);
-  }
-
-  50% {
-    transform: rotate(180deg);
-  }
-
-  75% {
-    transform: rotate(270deg);
-  }
-
-  to {
-    transform: rotate(360deg);
+  //opacity: 0.5;
+  background-color: transparent;
+  color: $input-text-color;
+  &:focus {
+    outline: none;
   }
 }

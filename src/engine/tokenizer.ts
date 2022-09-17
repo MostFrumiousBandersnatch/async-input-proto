@@ -20,7 +20,7 @@ export const tokenProcessor = async (raw: string): Promise<ParsedSnapshot> => {
         start: start,
         end: start + token.length,
         color: pickColor(token),
-        spaceBefore: prev ? start - prev.end + 1 : undefined,
+        spaceBefore: prev ? start - prev.end : start,
         role: token.length > 2 ? 'key' : '',
       },
     ];

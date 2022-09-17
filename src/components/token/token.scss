@@ -1,0 +1,28 @@
+@import 'src/styles/meta';
+
+.token {
+  display: inline-block;
+  border-radius: 2px;
+  border-width: 0px;
+  border-style: dashed;
+
+  position: relative;
+  opacity: $token-bg-opacity;
+
+  &::before {
+    content: attr(data-role);
+    background-color: inherit;
+    color: RoyalBlue;
+
+    position: absolute;
+    top: -8px;
+    right: 0px;
+    font-size: 8px;
+    padding: 0 2px;
+    border-radius: 2px 2px 0px 0px;
+  }
+}
+
+.gap {
+  white-space: pre;
+}
