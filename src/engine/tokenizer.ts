@@ -9,7 +9,11 @@ const pickColor = (content: string): string =>
 export const breakString = (raw: string): string[] =>
   raw.split(/\s+/).filter(token => token.length > 0);
 
-export const tokenProcessor = async (raw: string): Promise<ParsedSnapshot> => {
+export interface TokenProcessorOptions {
+  slowFactor: number;
+}
+
+export const tokenProcessor = async (raw: string, options: TokenProcessorOptions): Promise<ParsedSnapshot> => {
   const tokens = breakString(raw).reduce((parsed, token) => {
     const prev = parsed.at(-1);
     const start = raw.indexOf(token, prev?.end || 0);
@@ -21,13 +25,13 @@ export const tokenProcessor = async (raw: string): Promise<ParsedSnapshot> => {
         end: start + token.length,
         color: pickColor(token),
         spaceBefore: prev ? start - prev.end : start,
-        role: token.length > 2 ? 'key' : '',
+        role: token.length > 2 ? `len(${token.length})` : '',
       },
     ];
   }, []);
 
   const del = Math.random() * 1000;
-  await delay(del);
+  await delay(del * options.slowFactor);
 
   return {
     raw,

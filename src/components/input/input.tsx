@@ -5,13 +5,19 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import classNames  from 'classnames';
+import classNames from 'classnames';
 
 import { Token } from '@root/components/token/token';
 
 import { ParsedSnapshot } from '@root/engine/types';
 
 import './input.scss';
+
+interface InputContextType {
+  debug: boolean;
+}
+
+export const InputContext = React.createContext<InputContextType | null>(null);
 
 interface InputProps {
   snapshot: ParsedSnapshot | null;
@@ -41,20 +47,20 @@ export const Input = ({ snapshot, onChange }: InputProps) => {
   );
 
   return (
-    <div className={classNames(['async-input', {loading}])}>
-      <div className="layer tags">
-        {tokens.map((token, n) => (
-          <Token {...token} key={`${n}_${token.content}`} />
-        ))}
+      <div className={classNames(['async-input', { loading }])}>
+        <div className="layer tags">
+          {tokens.map((token, n) => (
+            <Token {...token} key={`${n}_${token.content}`} />
+          ))}
+        </div>
+        <input
+          type="text"
+          className="layer"
+          spellCheck="false"
+          ref={inputRef}
+          onInput={onInput}
+        />
+        <div className="spinner" />
       </div>
-      <input
-        type="text"
-        className="layer"
-        spellCheck="false"
-        ref={inputRef}
-        onInput={onInput}
-      />
-      <div className="spinner" />
-    </div>
   );
 };
