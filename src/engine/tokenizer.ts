@@ -1,5 +1,4 @@
 import { ParsedSnapshot } from '@root/engine/types';
-import { delay } from '@root/utils/async';
 
 const COLORS = ['lightblue', 'lightgreen', 'cadetblue'];
 
@@ -9,11 +8,7 @@ const pickColor = (content: string): string =>
 export const breakString = (raw: string): string[] =>
   raw.split(/\s+/).filter(token => token.length > 0);
 
-export interface TokenProcessorOptions {
-  slowFactor: number;
-}
-
-export const tokenProcessor = async (raw: string, options: TokenProcessorOptions): Promise<ParsedSnapshot> => {
+export const tokenProcessor = (raw: string): ParsedSnapshot => {
   const tokens = breakString(raw).reduce((parsed, token) => {
     const prev = parsed.at(-1);
     const start = raw.indexOf(token, prev?.end || 0);
@@ -30,11 +25,9 @@ export const tokenProcessor = async (raw: string, options: TokenProcessorOptions
     ];
   }, []);
 
-  const del = Math.random() * 1000;
-  await delay(del * options.slowFactor);
-
   return {
     raw,
     parsed: tokens,
   };
 };
+
