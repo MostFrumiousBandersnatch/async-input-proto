@@ -42,37 +42,39 @@ export const App = () => {
         <Input snapshot={currSnapshot} onChange={process} />
       </InputContext.Provider>
       <table id="settings">
-        <tr>
-          <td>
-            <label htmlFor="debug-toggle">Debug mode</label>
-          </td>
-          <td>
-            <input
-              type="checkbox"
-              id="debug-toggle"
-              name="debug-mode"
-              checked={debug}
-              onChange={toggleDebug}
-            />
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <label htmlFor="slow">Slow factor</label>
-          </td>
-          <td>
-            <input
-              type="range"
-              min="0"
-              max="5"
-              id="slow"
-              value={slowFactor}
-              onChange={evt => {
-                setSlowFactor(evt.target.valueAsNumber);
-              }}
-            />
-          </td>
-        </tr>
+        <tbody>
+          <tr>
+            <td>
+              <label htmlFor="debug-toggle">Debug mode</label>
+            </td>
+            <td>
+              <input
+                type="checkbox"
+                id="debug-toggle"
+                name="debug-mode"
+                checked={debug}
+                onChange={toggleDebug}
+              />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label htmlFor="slow">Slow factor</label>
+            </td>
+            <td>
+              <input
+                type="range"
+                min="0"
+                max="5"
+                id="slow"
+                value={slowFactor}
+                onChange={evt => {
+                  setSlowFactor(evt.target.valueAsNumber);
+                }}
+              />
+            </td>
+          </tr>
+        </tbody>
       </table>
     </div>
   );
