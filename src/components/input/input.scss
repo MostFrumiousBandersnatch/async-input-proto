@@ -77,6 +77,10 @@
 
   border: 1px solid transparent;
   white-space: pre;
+
+  &.tags {
+    display: flex;
+  }
 }
 
 input.layer {

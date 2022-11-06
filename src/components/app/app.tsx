@@ -2,25 +2,8 @@ import React, { useCallback, useReducer, useState } from 'react';
 
 import { Input, InputContext } from '@root/components/input/input';
 
-import { delay } from '@root/utils/async';
-import { ParsedSnapshot } from '@root/engine/types';
-import { tokenProcessor } from '@root/engine/tokenizer';
-
 import './app.css';
-
-interface FakeTokenProcessorOptions {
-  slowFactor: number;
-}
-
-const dummyTokenProcessor = async (
-  raw: string,
-  options: FakeTokenProcessorOptions
-): Promise<ParsedSnapshot> => {
-  const res = tokenProcessor(raw);
-  const del = Math.random() * 1000;
-  await delay(del * options.slowFactor);
-  return res;
-};
+import { dummyTokenProcessor } from './dummyProcessor';
 
 export const App = () => {
   const [currSnapshot, setCurrSnapshot] = useState(null);

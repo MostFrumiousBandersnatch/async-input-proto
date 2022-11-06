@@ -1,7 +1,9 @@
 import React, {
   ChangeEvent,
+  KeyboardEvent,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -9,9 +11,10 @@ import classNames from 'classnames';
 
 import { Token } from '@root/components/token/token';
 
-import { ParsedSnapshot } from '@root/engine/types';
+import { ParsedSnapshot, TokenWithSuggestions } from '@root/engine/types';
 
 import './input.scss';
+import { cyclicShift } from '@root/utils/misc';
 
 interface InputContextType {
   debug: boolean;
@@ -28,6 +31,7 @@ export const Input = ({ snapshot, onChange }: InputProps) => {
   const [tokens, setTokens] = useState([]);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef();
+  const [selection, setSelection] = useState<[number, number]>([0, 0]);
 
   useEffect(() => {
     if (snapshot?.raw === (inputRef.current as HTMLInputElement)?.value) {
@@ -46,21 +50,77 @@ export const Input = ({ snapshot, onChange }: InputProps) => {
     [onChange]
   );
 
+  const onSelectionChange = useCallback(() => {
+    if (inputRef.current) {
+      setSelection([
+        inputRef.current &&
+          (inputRef.current as HTMLInputElement).selectionStart,
+        inputRef.current && (inputRef.current as HTMLInputElement).selectionEnd,
+      ]);
+    }
+  }, [inputRef]);
+
+  const currToken = useMemo<TokenWithSuggestions | undefined>(() => {
+    if (snapshot && selection[0] === selection[1]) {
+      return snapshot.parsed.find(
+        ({ start, end }) => selection[0] >= start && selection[0] <= end + 1
+      );
+    }
+  }, [snapshot, selection]);
+
+  const [currVariant, setCurrVariant] = useState(0);
+
+  const onKeyDown = useCallback(
+    (evt: KeyboardEvent<HTMLInputElement>) => {
+      if (inputRef.current && currToken && currToken.variants?.length > 0) {
+        switch (evt.code) {
+          case 'ArrowUp':
+            setCurrVariant(value =>
+              cyclicShift(value, -1, currToken.variants.length)
+            );
+            evt.preventDefault();
+            break;
+          case 'ArrowDown':
+            setCurrVariant(value =>
+              cyclicShift(value, 1, currToken.variants.length)
+            );
+            break;
+          case 'Enter':
+            //TODO: decouple from currVariant
+            (inputRef.current as HTMLInputElement).setRangeText(
+              currToken.variants[currVariant] + ' ',
+              currToken.start,
+              currToken.end,
+              'end'
+            );
+        }
+      }
+    },
+    [currToken, setCurrVariant, inputRef, currVariant]
+  );
+
   return (
-      <div className={classNames(['async-input', { loading }])}>
-        <div className="layer tags">
-          {tokens.map((token, n) => (
-            <Token {...token} key={`${n}_${token.content}`} />
-          ))}
-        </div>
-        <input
-          type="text"
-          className="layer"
-          spellCheck="false"
-          ref={inputRef}
-          onInput={onInput}
-        />
-        <div className="spinner" />
+    <div className={classNames(['async-input', { loading }])}>
+      <div className="layer tags">
+        {tokens.map(token => (
+          <Token
+            {...token}
+            key={token.id}
+            highlighted={token.id === currToken?.id}
+            currVariant={currVariant}
+          />
+        ))}
       </div>
+      <input
+        type="text"
+        className="layer"
+        spellCheck="false"
+        ref={inputRef}
+        onChange={onInput}
+        onKeyDown={onKeyDown}
+        onSelect={onSelectionChange}
+      />
+      <div className="spinner" />
+    </div>
   );
 };

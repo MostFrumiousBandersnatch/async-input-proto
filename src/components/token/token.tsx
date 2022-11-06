@@ -1,13 +1,24 @@
 import { InputContext } from '@root/components/input/input';
-import { ParsedToken } from '@root/engine/types';
+import { TokenWithSuggestions } from '@root/engine/types';
 import { repeat } from '@root/utils/misc';
 import React, { useContext } from 'react';
 
 import './token.scss';
 
-export type TokenProps = ParsedToken;
+export interface TokenProps extends TokenWithSuggestions {
+  highlighted: boolean;
+  currVariant: number;
+}
 
-export const Token = ({ content, color, role, spaceBefore }: TokenProps) => {
+export const Token = ({
+  content,
+  color,
+  role,
+  spaceBefore,
+  highlighted,
+  variants,
+  currVariant,
+}: TokenProps) => {
   const { debug } = useContext(InputContext);
   return (
     <>
@@ -16,11 +27,24 @@ export const Token = ({ content, color, role, spaceBefore }: TokenProps) => {
       )}
 
       <span
-        className="token"
+        className={`token ${highlighted ? 'focused' : ''}`}
         data-role={role}
-        style={{ backgroundColor: color, color: debug ? 'inherit' : color }}
+        style={{
+          backgroundColor: color,
+          color: debug ? 'inherit' : color,
+        }}
       >
         {content}
+
+        {variants?.length > 0 && (
+          <ul className="variants">
+            {variants.map((text, n) => (
+              <li key={text} className={currVariant === n ? 'current' : ''}>
+                {text}
+              </li>
+            ))}
+          </ul>
+        )}
       </span>
     </>
   );

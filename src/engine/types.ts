@@ -5,17 +5,23 @@ export interface Token {
   spaceBefore: number;
 }
 
+interface Identified {
+  id: string;
+}
 interface Colored {
   color: string;
 }
-
 interface RoleAware {
-  role?: string;
+  role: string;
+}
+interface WithSuggestions {
+  variants: string[];
 }
 
-export interface ParsedToken extends Token, Colored, RoleAware {}
+export interface ParsedToken extends Token, Identified, Colored, Partial<RoleAware> {}
 
+export interface TokenWithSuggestions extends ParsedToken, Partial<WithSuggestions> {}
 export interface ParsedSnapshot {
   raw: string;
-  parsed: ParsedToken[];
+  parsed: TokenWithSuggestions[];
 }

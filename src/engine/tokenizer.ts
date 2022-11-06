@@ -1,26 +1,28 @@
-import { ParsedSnapshot } from '@root/engine/types';
+import { ParsedSnapshot, Token } from '@root/engine/types';
 
-const COLORS = ['lightblue', 'lightgreen', 'cadetblue'];
-
-const pickColor = (content: string): string =>
-  COLORS[Math.floor(Math.random() * COLORS.length)];
 
 export const breakString = (raw: string): string[] =>
   raw.split(/\s+/).filter(token => token.length > 0);
 
+export const genTokenId = (token: Token): string => `${token.content}_${token.start}`;
+
 export const tokenProcessor = (raw: string): ParsedSnapshot => {
-  const tokens = breakString(raw).reduce((parsed, token) => {
+  const tokens = breakString(raw).reduce((parsed, rawPart) => {
     const prev = parsed.at(-1);
-    const start = raw.indexOf(token, prev?.end || 0);
+    const start = raw.indexOf(rawPart, prev?.end || 0);
+
+    const token: Token = {
+      content: rawPart,
+      start: start,
+      end: start + rawPart.length,
+      spaceBefore: prev ? start - prev.end : start,
+    };
+
     return [
       ...parsed,
       {
-        content: token,
-        start: start,
-        end: start + token.length,
-        color: pickColor(token),
-        spaceBefore: prev ? start - prev.end : start,
-        role: token.length > 2 ? `len(${token.length})` : '',
+        ...token,
+       id: genTokenId(token)
       },
     ];
   }, []);
