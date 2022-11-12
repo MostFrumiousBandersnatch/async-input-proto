@@ -21,9 +21,6 @@ export const App = () => {
 
   return (
     <div className="app">
-      <InputContext.Provider value={{ debug }}>
-        <Input snapshot={currSnapshot} onChange={process} />
-      </InputContext.Provider>
       <table id="settings">
         <tbody>
           <tr>
@@ -59,6 +56,9 @@ export const App = () => {
           </tr>
         </tbody>
       </table>
+      <InputContext.Provider value={{ debug }}>
+        <Input snapshot={currSnapshot} onChange={process} />
+      </InputContext.Provider>
     </div>
   );
 };
