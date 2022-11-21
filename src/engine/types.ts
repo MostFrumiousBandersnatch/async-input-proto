@@ -18,10 +18,11 @@ interface WithSuggestions {
   variants: string[];
 }
 
-export interface ParsedToken extends Token, Identified, Colored, Partial<RoleAware> {}
+export interface ParsedToken extends Token, Identified, Partial<Colored>, Partial<RoleAware> {}
 
 export interface TokenWithSuggestions extends ParsedToken, Partial<WithSuggestions> {}
 export interface ParsedSnapshot {
   raw: string;
+  append?: string;
   parsed: TokenWithSuggestions[];
 }

@@ -27,7 +27,9 @@ export const Token = ({
       )}
 
       <span
-        className={`token ${highlighted ? 'focused' : ''}`}
+        className={`token ${debug ? 'debug' : ''} ${
+          highlighted ? 'focused' : ''
+        }`}
         data-role={role}
         style={{
           backgroundColor: color,

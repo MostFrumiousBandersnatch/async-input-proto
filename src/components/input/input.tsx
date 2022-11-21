@@ -34,7 +34,16 @@ export const Input = ({ snapshot, onChange }: InputProps) => {
   const [selection, setSelection] = useState<[number, number]>([0, 0]);
 
   useEffect(() => {
-    if (snapshot?.raw === (inputRef.current as HTMLInputElement)?.value) {
+    const input = inputRef.current as HTMLInputElement;
+
+    if (snapshot?.raw === input.value) {
+      if (snapshot.append) {
+        input.value += snapshot.append;
+        (inputRef.current as HTMLInputElement).setSelectionRange(
+          snapshot.raw.length,
+          snapshot.raw.length
+        );
+      }
       setTokens(snapshot.parsed);
       setLoading(false);
     }

@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 @import 'src/styles/meta';
 
 .token {
@@ -41,6 +43,10 @@
 
   &.focused {
     opacity: 1;
+
+    &.debug {
+      background-color: transparentize(rgb(187, 24, 136), 0.5) !important;
+    }
 
     >ul.variants {
       display: block;
