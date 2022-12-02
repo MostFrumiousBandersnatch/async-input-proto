@@ -3,6 +3,7 @@ export interface Token {
   start: number;
   end: number;
   spaceBefore: number;
+  ghost: boolean;
 }
 
 interface Identified {
@@ -23,6 +24,5 @@ export interface ParsedToken extends Token, Identified, Partial<Colored>, Partia
 export interface TokenWithSuggestions extends ParsedToken, Partial<WithSuggestions> {}
 export interface ParsedSnapshot {
   raw: string;
-  append?: string;
   parsed: TokenWithSuggestions[];
 }

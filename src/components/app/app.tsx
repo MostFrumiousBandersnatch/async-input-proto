@@ -8,7 +8,7 @@ import { dummyTokenProcessor } from './dummyProcessor';
 export const App = () => {
   const [currSnapshot, setCurrSnapshot] = useState(null);
 
-  const [debug, toggleDebug] = useReducer(x => !x, false);
+  const [debug, toggleDebug] = useReducer(x => !x, true);
   const [slowFactor, setSlowFactor] = useState(1);
 
   const process = useCallback(

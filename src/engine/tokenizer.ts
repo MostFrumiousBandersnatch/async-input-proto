@@ -16,6 +16,7 @@ export const tokenProcessor = (raw: string): ParsedSnapshot => {
       start: start,
       end: start + rawPart.length,
       spaceBefore: prev ? start - prev.end : start,
+      ghost: false
     };
 
     return [

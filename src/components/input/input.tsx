@@ -15,6 +15,7 @@ import { ParsedSnapshot, TokenWithSuggestions } from '@root/engine/types';
 
 import './input.scss';
 import { cyclicShift } from '@root/utils/misc';
+import {isEdgeToken} from '@root/engine/utils';
 
 interface InputContextType {
   debug: boolean;
@@ -37,13 +38,6 @@ export const Input = ({ snapshot, onChange }: InputProps) => {
     const input = inputRef.current as HTMLInputElement;
 
     if (snapshot?.raw === input.value) {
-      if (snapshot.append) {
-        input.value += snapshot.append;
-        (inputRef.current as HTMLInputElement).setSelectionRange(
-          snapshot.raw.length,
-          snapshot.raw.length
-        );
-      }
       setTokens(snapshot.parsed);
       setLoading(false);
     }
@@ -72,40 +66,48 @@ export const Input = ({ snapshot, onChange }: InputProps) => {
   const currToken = useMemo<TokenWithSuggestions | undefined>(() => {
     if (snapshot && selection[0] === selection[1]) {
       return snapshot.parsed.find(
-        ({ start, end }) => selection[0] >= start && selection[0] <= end + 1
+        ({ start, end }) => selection[0] >= start && selection[0] <= end
       );
     }
   }, [snapshot, selection]);
 
   const [currVariant, setCurrVariant] = useState(0);
 
+  useEffect(() => {
+    setCurrVariant(0);
+  }, [currToken]);
+
   const onKeyDown = useCallback(
     (evt: KeyboardEvent<HTMLInputElement>) => {
       if (inputRef.current && currToken && currToken.variants?.length > 0) {
         switch (evt.code) {
           case 'ArrowUp':
+            evt.preventDefault();
             setCurrVariant(value =>
               cyclicShift(value, -1, currToken.variants.length)
             );
-            evt.preventDefault();
             break;
           case 'ArrowDown':
+            evt.preventDefault();
             setCurrVariant(value =>
               cyclicShift(value, 1, currToken.variants.length)
             );
             break;
-          case 'Enter':
-            //TODO: decouple from currVariant
+          case 'Enter': //TODO: decouple from currVariant
+          {
+            const isAtEdge = isEdgeToken(snapshot, currToken);
+
             (inputRef.current as HTMLInputElement).setRangeText(
-              currToken.variants[currVariant] + ' ',
+              currToken.variants[currVariant] + (isAtEdge ? ' ' : ''),
               currToken.start,
               currToken.end,
               'end'
             );
+          }
         }
       }
     },
-    [currToken, setCurrVariant, inputRef, currVariant]
+    [snapshot, currToken, setCurrVariant, inputRef, currVariant]
   );
 
   return (
