@@ -2,8 +2,9 @@ import React, { useCallback, useReducer, useState } from 'react';
 
 import { Input, InputContext } from '@root/components/input/input';
 
+import { dummyTokenProcessor } from './dummy/processor';
+
 import './app.css';
-import { dummyTokenProcessor } from './dummyProcessor';
 
 export const App = () => {
   const [currSnapshot, setCurrSnapshot] = useState(null);
