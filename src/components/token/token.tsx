@@ -16,10 +16,11 @@ export const Token = ({
   role,
   spaceBefore,
   highlighted,
-  variants,
+  variants = [],
   currVariant,
 }: TokenProps) => {
   const { debug } = useContext(InputContext);
+
   return (
     <>
       {spaceBefore > 0 && (
@@ -37,7 +38,6 @@ export const Token = ({
         }}
       >
         {content}
-
         {variants?.length > 0 && (
           <ul className="variants">
             {variants.map((text, n) => (

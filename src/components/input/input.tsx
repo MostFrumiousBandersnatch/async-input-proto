@@ -15,7 +15,7 @@ import { ParsedSnapshot, TokenWithSuggestions } from '@root/engine/types';
 
 import './input.scss';
 import { cyclicShift } from '@root/utils/misc';
-import {isEdgeToken} from '@root/engine/utils';
+import { getActualVariants, isEdgeToken } from '@root/engine/utils';
 
 interface InputContextType {
   debug: boolean;
@@ -46,7 +46,6 @@ export const Input = ({ snapshot, onChange }: InputProps) => {
   const onInput = useCallback(
     (evt: ChangeEvent<HTMLInputElement>) => {
       const raw = evt.target.value;
-
       onChange(raw);
       setLoading(true);
     },
@@ -71,43 +70,60 @@ export const Input = ({ snapshot, onChange }: InputProps) => {
     }
   }, [snapshot, selection]);
 
+  const currVariants = useMemo(
+    () => currToken && getActualVariants(currToken),
+    [currToken]
+  );
   const [currVariant, setCurrVariant] = useState(0);
 
   useEffect(() => {
     setCurrVariant(0);
-  }, [currToken]);
+  }, [currVariants]);
 
   const onKeyDown = useCallback(
     (evt: KeyboardEvent<HTMLInputElement>) => {
-      if (inputRef.current && currToken && currToken.variants?.length > 0) {
+      if (inputRef.current && currVariants?.length > 0) {
         switch (evt.code) {
           case 'ArrowUp':
             evt.preventDefault();
             setCurrVariant(value =>
-              cyclicShift(value, -1, currToken.variants.length)
+              cyclicShift(value, -1, currVariants.length)
             );
             break;
+
           case 'ArrowDown':
             evt.preventDefault();
-            setCurrVariant(value =>
-              cyclicShift(value, 1, currToken.variants.length)
-            );
+            setCurrVariant(value => cyclicShift(value, 1, currVariants.length));
             break;
-          case 'Enter': //TODO: decouple from currVariant
-          {
-            const isAtEdge = isEdgeToken(snapshot, currToken);
 
-            (inputRef.current as HTMLInputElement).setRangeText(
-              currToken.variants[currVariant] + (isAtEdge ? ' ' : ''),
+          case 'Tab':
+          case 'Enter': {
+            evt.preventDefault();
+            //TODO: decouple from currVariant
+            const isAtEdge = isEdgeToken(snapshot, currToken);
+            const input = inputRef.current as HTMLInputElement;
+
+            input.setRangeText(
+              currVariants[currVariant] + (isAtEdge ? ' ' : ''),
               currToken.start,
               currToken.end,
               'end'
             );
+
+            onChange(input.value);
           }
         }
       }
     },
-    [snapshot, currToken, setCurrVariant, inputRef, currVariant]
+    [
+      snapshot,
+      currToken,
+      currVariants,
+      setCurrVariant,
+      inputRef,
+      currVariant,
+      onChange,
+    ]
   );
 
   return (
@@ -116,6 +132,7 @@ export const Input = ({ snapshot, onChange }: InputProps) => {
         {tokens.map(token => (
           <Token
             {...token}
+            variants={currVariants}
             key={token.id}
             highlighted={token.id === currToken?.id}
             currVariant={currVariant}
