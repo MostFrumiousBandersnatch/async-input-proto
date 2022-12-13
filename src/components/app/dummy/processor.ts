@@ -84,7 +84,7 @@ export const dummyTokenProcessor = async (
         ? {}
         : {
             role:
-              token.content.length > 2 ? `len(${token.content.length})` : '',
+              token.content.length > 2 ? '***' : '*',
           }),
     }))
     .map(tokenInjectors);
