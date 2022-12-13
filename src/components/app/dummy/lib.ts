@@ -4,7 +4,7 @@ import {
   TokenWithSuggestions,
 } from '@root/engine/types';
 
-import { identity } from 'lodash';
+import identity from 'lodash/identity';
 
 
 const COLORS = ['lightblue', 'lightgreen', 'cadetblue'];
