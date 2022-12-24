@@ -28,4 +28,4 @@ export interface ParsedSnapshot {
 }
 
 export type Tokenizer = (raw: string) => ParsedSnapshot;
-export type AsyncTokenizer<OptionsType> = (raw: string, options?: OptionsType) => Promise<ParsedSnapshot>;
+export type AsyncTokenizer = (raw: string) => Promise<ParsedSnapshot>;

@@ -73,25 +73,25 @@ const snapshotInjectors = withInjectors<ParsedSnapshot>(
   })
 );
 
-export const dummyTokenProcessor: AsyncTokenizer<
-  FakeTokenProcessorOptions
-> = async (raw, options) => {
-  const snap = tokenProcessor(raw);
-  const res = snapshotInjectors(snap);
+export const dummyTokenProcessor =
+  (options: FakeTokenProcessorOptions): AsyncTokenizer =>
+  async raw => {
+    const snap = tokenProcessor(raw);
+    const res = snapshotInjectors(snap);
 
-  res.parsed = res.parsed
-    .map(token => ({
-      ...token,
-      color: pickColor(token),
-      ...(token.role
-        ? {}
-        : {
-            role: token.content.length > 2 ? '***' : '*',
-          }),
-    }))
-    .map(tokenInjectors);
+    res.parsed = res.parsed
+      .map(token => ({
+        ...token,
+        color: pickColor(token),
+        ...(token.role
+          ? {}
+          : {
+              role: token.content.length > 2 ? '***' : '*',
+            }),
+      }))
+      .map(tokenInjectors);
 
-  const del = Math.random() * 1000;
-  await delay(del * options.slowFactor);
-  return res;
-};
+    const del = Math.random() * 1000;
+    await delay(del * options.slowFactor);
+    return res;
+  };

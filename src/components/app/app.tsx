@@ -1,24 +1,18 @@
-import React, { useCallback, useReducer, useState } from 'react';
+import React, { useMemo, useReducer, useState } from 'react';
 
-import { Input, InputContext } from '@root/components/input/input';
+import { InputContext } from '@root/components/input/input';
 
 import { dummyTokenProcessor } from './dummy/processor';
 
 import './app.css';
+import {PluggedInput} from '@root/components/input/plugged_input';
 
 export const App = () => {
-  const [currSnapshot, setCurrSnapshot] = useState(null);
 
   const [debug, toggleDebug] = useReducer(x => !x, true);
   const [slowFactor, setSlowFactor] = useState(1);
 
-  const process = useCallback(
-    async (raw: string) => {
-      const snapshot = await dummyTokenProcessor(raw, { slowFactor });
-      setCurrSnapshot(snapshot);
-    },
-    [setCurrSnapshot, slowFactor]
-  );
+  const processor = useMemo(() => dummyTokenProcessor({slowFactor}), [slowFactor]);
 
   return (
     <div className="app">
@@ -58,7 +52,7 @@ export const App = () => {
         </tbody>
       </table>
       <InputContext.Provider value={{ debug }}>
-        <Input snapshot={currSnapshot} onChange={process} />
+        <PluggedInput processor={processor} />
       </InputContext.Provider>
     </div>
   );
