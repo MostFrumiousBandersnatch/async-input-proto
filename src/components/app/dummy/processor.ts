@@ -4,7 +4,11 @@ import {
   zipTokens,
 } from '@root/components/app/dummy/lib';
 import { tokenProcessor } from '@root/engine/tokenizer';
-import { ParsedSnapshot, TokenWithSuggestions } from '@root/engine/types';
+import {
+  AsyncTokenizer,
+  ParsedSnapshot,
+  TokenWithSuggestions,
+} from '@root/engine/types';
 import { delay } from '@root/utils/async';
 
 import { withInjectors } from './injectors';
@@ -69,10 +73,9 @@ const snapshotInjectors = withInjectors<ParsedSnapshot>(
   })
 );
 
-export const dummyTokenProcessor = async (
-  raw: string,
-  options: FakeTokenProcessorOptions
-): Promise<ParsedSnapshot> => {
+export const dummyTokenProcessor: AsyncTokenizer<
+  FakeTokenProcessorOptions
+> = async (raw, options) => {
   const snap = tokenProcessor(raw);
   const res = snapshotInjectors(snap);
 
@@ -83,8 +86,7 @@ export const dummyTokenProcessor = async (
       ...(token.role
         ? {}
         : {
-            role:
-              token.content.length > 2 ? '***' : '*',
+            role: token.content.length > 2 ? '***' : '*',
           }),
     }))
     .map(tokenInjectors);

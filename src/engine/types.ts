@@ -26,3 +26,6 @@ export interface ParsedSnapshot {
   raw: string;
   parsed: TokenWithSuggestions[];
 }
+
+export type Tokenizer = (raw: string) => ParsedSnapshot;
+export type AsyncTokenizer<OptionsType> = (raw: string, options?: OptionsType) => Promise<ParsedSnapshot>;

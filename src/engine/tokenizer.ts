@@ -1,4 +1,4 @@
-import { ParsedSnapshot, Token } from '@root/engine/types';
+import { Token, Tokenizer } from '@root/engine/types';
 
 
 export const breakString = (raw: string): string[] =>
@@ -6,7 +6,7 @@ export const breakString = (raw: string): string[] =>
 
 export const genTokenId = (token: Token): string => `${token.content}_${token.start}`;
 
-export const tokenProcessor = (raw: string): ParsedSnapshot => {
+export const tokenProcessor: Tokenizer = raw=> {
   const tokens = breakString(raw).reduce((parsed, rawPart) => {
     const prev = parsed.at(-1);
     const start = raw.indexOf(rawPart, prev?.end || 0);
