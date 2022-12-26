@@ -17,7 +17,7 @@ import './input.scss';
 import { cyclicShift } from '@root/utils/misc';
 import { getActualVariants, isEdgeToken } from '@root/engine/utils';
 
-interface InputContextType {
+export interface InputContextType {
   debug: boolean;
 }
 
@@ -28,7 +28,10 @@ interface InputProps {
   onChange: (value: string) => void;
 }
 
-export const Input = ({ snapshot, onChange }: InputProps) => {
+export const Input = React.memo(function Input({
+  snapshot,
+  onChange,
+}: InputProps) {
   const [tokens, setTokens] = useState([]);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef();
@@ -151,4 +154,4 @@ export const Input = ({ snapshot, onChange }: InputProps) => {
       <div className="spinner" />
     </div>
   );
-};
+});

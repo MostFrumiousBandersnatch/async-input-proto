@@ -1,21 +1,38 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { Input } from '@root/components/input/input';
+import {
+  Input,
+  InputContext,
+  InputContextType,
+} from '@root/components/input/input';
 import { AsyncTokenizer } from '@root/engine/types';
 
 export interface PluggedInputProps {
   processor: AsyncTokenizer;
+  ctx: InputContextType;
 }
 
-export const PluggedInput = ({ processor }: PluggedInputProps) => {
+export const PluggedInput = ({ processor, ctx }: PluggedInputProps) => {
   const [currSnapshot, setCurrSnapshot] = useState(null);
+
+  //ugly trick to decouple underlying input from processor instance
+  const processorRef = useRef(processor);
+
+  useEffect(() => {
+    processorRef.current = processor;
+  }, [processor]);
+
   const process = useCallback(
     async (raw: string) => {
-      const snapshot = await processor(raw);
+      const snapshot = await processorRef.current(raw);
       setCurrSnapshot(snapshot);
     },
-    [processor, setCurrSnapshot]
+    [processorRef, setCurrSnapshot]
   );
 
-  return <Input snapshot={currSnapshot} onChange={process} />;
+  return (
+    <InputContext.Provider value={ctx}>
+      <Input snapshot={currSnapshot} onChange={process} />
+    </InputContext.Provider>
+  );
 };

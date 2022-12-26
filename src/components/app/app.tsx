@@ -1,18 +1,21 @@
 import React, { useMemo, useReducer, useState } from 'react';
 
-import { InputContext } from '@root/components/input/input';
+import { InputContextType } from '@root/components/input/input';
+import { PluggedInput } from '@root/components/input/plugged_input';
 
 import { dummyTokenProcessor } from './dummy/processor';
-
 import './app.css';
-import {PluggedInput} from '@root/components/input/plugged_input';
 
 export const App = () => {
-
   const [debug, toggleDebug] = useReducer(x => !x, true);
   const [slowFactor, setSlowFactor] = useState(1);
 
-  const processor = useMemo(() => dummyTokenProcessor({slowFactor}), [slowFactor]);
+  const processor = useMemo(
+    () => dummyTokenProcessor({ slowFactor }),
+    [slowFactor]
+  );
+
+  const ctx = useMemo<InputContextType>(() => ({ debug }), [debug]);
 
   return (
     <div className="app">
@@ -51,9 +54,7 @@ export const App = () => {
           </tr>
         </tbody>
       </table>
-      <InputContext.Provider value={{ debug }}>
-        <PluggedInput processor={processor} />
-      </InputContext.Provider>
+      <PluggedInput processor={processor} ctx={ctx} />
     </div>
   );
 };
