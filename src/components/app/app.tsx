@@ -4,7 +4,7 @@ import { InputContextType } from '@root/components/input/input';
 import { PluggedInput } from '@root/components/input/plugged_input';
 
 import { dummyTokenProcessor } from './dummy/processor';
-import './app.css';
+import './app.scss';
 
 export const App = () => {
   const [debug, toggleDebug] = useReducer(x => !x, true);

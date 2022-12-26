@@ -1,18 +1,12 @@
-import {
-  ParsedToken,
-  Token,
-  TokenWithSuggestions,
-} from '@root/engine/types';
+import { ParsedToken, Token, TokenWithSuggestions } from '@root/engine/types';
 
 import identity from 'lodash/identity';
 
-
-const COLORS = ['lightblue', 'lightgreen', 'cadetblue'];
+const COLORS = ['#9edcd0', '#9ac9ed', '#6980e5', '#c79df2'];
 
 //eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const pickColor = (token: Token): string =>
   COLORS[Math.floor(Math.random() * COLORS.length)];
-
 
 export const zipTokens = (
   source: ParsedToken[],
@@ -40,9 +34,7 @@ export const checkTokens = (
             return specimen.variants.some(v => v === token.content);
         }
       } else {
-        return token.content === specimen.content;
+        return token?.content === specimen.content;
       }
     })
     .every(identity);
-
-
