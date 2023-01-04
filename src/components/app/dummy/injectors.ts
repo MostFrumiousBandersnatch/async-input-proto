@@ -1,4 +1,4 @@
-type Injector<T> = (input: T) => T;
+export type Injector<T> = (input: T) => T;
 
 export const withInjectors =
   <T>(injectors: Array<Injector<T>>) =>

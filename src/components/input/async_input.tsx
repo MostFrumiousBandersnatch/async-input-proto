@@ -7,15 +7,15 @@ import {
 } from '@root/components/input/input';
 import { AsyncTokenizer } from '@root/engine/types';
 
-export interface PluggedInputProps {
+export interface AsyncInputProps {
   processor: AsyncTokenizer;
   ctx: InputContextType;
 }
 
-export const PluggedInput = ({ processor, ctx }: PluggedInputProps) => {
+export const AsyncInput: React.FC<AsyncInputProps> = ({ processor, ctx }) => {
   const [currSnapshot, setCurrSnapshot] = useState(null);
 
-  //ugly trick to decouple underlying input from processor instance
+  //ugly trick to decouple underlying input from processor's instance
   const processorRef = useRef(processor);
 
   useEffect(() => {

@@ -14,7 +14,7 @@
 
   &::before {
     content: attr(data-role);
-    background-color: inherit;
+    background: inherit;
     color: $input-text-color;
 
     position: absolute;

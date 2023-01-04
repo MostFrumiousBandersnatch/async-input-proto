@@ -1,9 +1,10 @@
 import React, { useMemo, useReducer, useState } from 'react';
 
 import { InputContextType } from '@root/components/input/input';
-import { PluggedInput } from '@root/components/input/plugged_input';
 
-import { dummyTokenProcessor } from './dummy/processor';
+import { dummyTokenStreamProcessor } from './dummy/processor';
+import {StreamInput} from '@root/components/input/stream_input';
+
 import './app.scss';
 
 export const App = () => {
@@ -11,7 +12,7 @@ export const App = () => {
   const [slowFactor, setSlowFactor] = useState(1);
 
   const processor = useMemo(
-    () => dummyTokenProcessor({ slowFactor }),
+    () => dummyTokenStreamProcessor({ slowFactor }),
     [slowFactor]
   );
 
@@ -54,7 +55,7 @@ export const App = () => {
           </tr>
         </tbody>
       </table>
-      <PluggedInput processor={processor} ctx={ctx} />
+      <StreamInput processor={processor} ctx={ctx} />
     </div>
   );
 };

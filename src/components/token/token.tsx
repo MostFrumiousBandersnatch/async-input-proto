@@ -33,7 +33,7 @@ export const Token = ({
         }`}
         data-role={role}
         style={{
-          backgroundColor: color,
+          background: color,
           color: debug ? 'inherit' : color,
         }}
       >

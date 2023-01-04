@@ -1,12 +1,50 @@
-import { ParsedToken, Token, TokenWithSuggestions } from '@root/engine/types';
+import { Injector } from '@root/components/app/dummy/injectors';
+import {
+  ParsedSnapshot,
+  ParsedToken,
+  Token,
+  TokenWithSuggestions,
+} from '@root/engine/types';
+import { repeat } from '@root/utils/misc';
 
 import identity from 'lodash/identity';
 
 const COLORS = ['#9edcd0', '#9ac9ed', '#6980e5', '#c79df2'];
 
 //eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const pickColor = (token: Token): string =>
+const pickColor = (token: Token): string =>
   COLORS[Math.floor(Math.random() * COLORS.length)];
+
+export const colorizeSnapshot: Injector<ParsedSnapshot> = snap => ({
+  ...snap,
+  parsed: snap.parsed.map(token => ({
+    ...token,
+    color: pickColor(token),
+  })),
+});
+
+export const embelisher =
+  (char: string): Injector<ParsedSnapshot> =>
+  snap => ({
+    ...snap,
+    parsed: snap.parsed.map(token => ({
+      ...token,
+      ...(token.role
+        ? {}
+        : {
+            role: repeat(char.charAt(0), token.content.length > 2 ? 3 : 1).join(
+              ''
+            ),
+          }),
+    })),
+  });
+
+export const withTokenInjectors =
+  (tokenInjector: Injector<TokenWithSuggestions>): Injector<ParsedSnapshot> =>
+  snap => ({
+    ...snap,
+    parsed: snap.parsed.map(tokenInjector),
+  });
 
 export const zipTokens = (
   source: ParsedToken[],

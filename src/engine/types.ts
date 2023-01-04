@@ -1,3 +1,5 @@
+import { Observable } from 'rxjs';
+
 export interface Token {
   content: string;
   start: number;
@@ -19,13 +21,23 @@ interface WithSuggestions {
   variants: string[];
 }
 
-export interface ParsedToken extends Token, Identified, Partial<Colored>, Partial<RoleAware> {}
+export interface ParsedToken
+  extends Token,
+    Identified,
+    Partial<Colored>,
+    Partial<RoleAware> {}
 
-export interface TokenWithSuggestions extends ParsedToken, Partial<WithSuggestions> {}
+export interface TokenWithSuggestions
+  extends ParsedToken,
+    Partial<WithSuggestions> {}
+
 export interface ParsedSnapshot {
   raw: string;
   parsed: TokenWithSuggestions[];
 }
 
 export type Tokenizer = (raw: string) => ParsedSnapshot;
+
 export type AsyncTokenizer = (raw: string) => Promise<ParsedSnapshot>;
+
+export type StreamTokenizer = (raw: string) => Observable<ParsedSnapshot>;
