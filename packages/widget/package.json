@@ -1,0 +1,39 @@
+{
+  "name": "@async-input/widget",
+  "version": "1.0.0",
+  "description": "Input widget with intellisense.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "author": "Ivan Kondratyev <ivanbright@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "yarn clean-dist && rollup -c rollup.config.mjs",
+    "clean-dist": "rimraf dist/*",
+    "lint": "eslint './src/**/*.ts?(x)'",
+    "test-watch": "jest --watchAll --config=jest.json",
+    "test": "jest --coverage --config=jest.json"
+  },
+  "devDependencies": {
+    "@types/classnames": "^2.2.11",
+    "@types/jest": "^26.0.3",
+    "@types/lodash": "^4.14.157",
+    "@types/node": "^14.0.14",
+    "@types/react": "^18",
+    "@typescript-eslint/eslint-plugin": "^5.30.7",
+    "@typescript-eslint/parser": "^5.30.7",
+    "jest": "^26.1.0",
+    "rimraf": "^3.0.2",
+    "rollup": "^3.9.1",
+    "rollup-plugin-scss": "^4.0.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "rollup-plugin-ts": "^3.0.2",
+    "typescript": "^4.7.4",
+    "whybundled": "^1.4.3"
+  },
+  "dependencies": {
+    "classnames": "^2.3.2",
+    "react": "^18",
+    "react-dom": "^18",
+    "rxjs": "^7.8.0"
+  }
+}
