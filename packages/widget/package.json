@@ -8,6 +8,7 @@
   "license": "MIT",
   "scripts": {
     "build": "yarn clean-dist && rollup -c rollup.config.mjs",
+    "build-watch": "yarn clean-dist && rollup -c rollup.config.mjs -w",
     "clean-dist": "rimraf dist/*",
     "lint": "eslint './src/**/*.ts?(x)'",
     "test-watch": "jest --watchAll --config=jest.json",
