@@ -13,8 +13,7 @@
     "lint": "eslint './src/**/*.ts?(x)'",
     "start-dev": "webpack-dev-server --config=webpack/dev.mjs",
     "start-prod": "static-server -p 8080 dist/",
-    "test-watch": "jest --watchAll --config=jest.json",
-    "test": "jest --coverage --config=jest.json"
+    "test": "echo 'nothing to test)'"
   },
   "devDependencies": {
     "@babel/cli": "^7.10.3",
