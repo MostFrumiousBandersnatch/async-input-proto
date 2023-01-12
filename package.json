@@ -6,8 +6,13 @@
   "author": "Ivan Kondratyev",
   "license": "GPL v3",
   "private": true,
-  "scripts": {},
+  "scripts": {
+    "track-widget": "lerna run build-watch --scope=@async-input/widget",
+    "start-demo": "lerna run start-dev --scope=@async-input/demo",
+    "run-all": "concurrently -rg --timings 'yarn track-widget' 'sleep 5 && yarn start-demo'"
+  },
   "devDependencies": {
+    "concurrently": "^7.6.0",
     "lerna": "^6.4.0",
     "rimraf": "^3.0.2",
     "whybundled": "^1.4.3"
