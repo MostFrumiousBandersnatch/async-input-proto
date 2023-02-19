@@ -73,11 +73,11 @@
 
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
     Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  font-size: 20pt;
+  font-size: $input-font-size;
   font-weight: 300;
   padding: #{14px - 4px} $input-padding $input-padding !important;
   width: calc(100% - #{2 * $input-padding});
-  line-height: calc(20pt - #{$input-padding / 2}); // TODO: clean this mess
+  line-height: 1;
   border: 1px solid transparent;
   white-space: pre;
 
