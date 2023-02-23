@@ -1,8 +1,17 @@
 import React, { useMemo, useReducer, useState } from 'react';
 
-import { InputContextType, StreamInput } from '@async-input/widget';
+import {
+  AsyncInput,
+  AsyncTokenizer,
+  InputContextType,
+  StreamInput,
+  StreamTokenizer,
+} from '@async-input/widget';
 
-import { dummyTokenStreamProcessor } from './dummy/processor';
+import {
+  dummyTokenProcessor,
+  dummyTokenStreamProcessor,
+} from './dummy/processor';
 
 //TODO: fix import of styles
 import '@async-input/widget/dist/output.css';
@@ -11,13 +20,20 @@ import './app.scss';
 export const App = () => {
   const [debug, toggleDebug] = useReducer(x => !x, true);
   const [slowFactor, setSlowFactor] = useState(1);
+  const [engine, setEngine] = useState<'async' | 'stream'>('async');
 
   const processor = useMemo(
-    () => dummyTokenStreamProcessor({ slowFactor }),
-    [slowFactor]
+    () =>
+      (engine === 'async' ? dummyTokenProcessor : dummyTokenStreamProcessor)({
+        slowFactor,
+      }),
+    [slowFactor, engine]
   );
 
-  const ctx = useMemo<InputContextType>(() => ({ debug }), [debug]);
+  const ctx = useMemo<InputContextType>(
+    () => ({ debug, hint: engine }),
+    [debug, engine]
+  );
 
   return (
     <div className="app">
@@ -35,6 +51,37 @@ export const App = () => {
                 checked={debug}
                 onChange={toggleDebug}
               />
+            </td>
+            <td rowSpan={2}>
+              <fieldset>
+                <legend>Engine:</legend>
+                <div>
+                  <input
+                    type="radio"
+                    name="engine"
+                    value="async"
+                    id="eng_async"
+                    checked={engine === 'async'}
+                    onChange={evt => {
+                      setEngine(evt.target.value as 'async');
+                    }}
+                  />
+                  <label htmlFor="eng_async">Async</label>
+                </div>
+                <div>
+                  <input
+                    type="radio"
+                    name="engine"
+                    value="stream"
+                    id="eng_stream"
+                    checked={engine === 'stream'}
+                    onChange={evt => {
+                      setEngine(evt.target.value as 'stream');
+                    }}
+                  />
+                  <label htmlFor="eng_stream">Streamed</label>
+                </div>
+              </fieldset>
             </td>
           </tr>
           <tr>
@@ -56,7 +103,12 @@ export const App = () => {
           </tr>
         </tbody>
       </table>
-      <StreamInput processor={processor} ctx={ctx} />
+      {engine === 'async' && (
+        <AsyncInput processor={processor as AsyncTokenizer} ctx={ctx} />
+      )}
+      {engine === 'stream' && (
+        <StreamInput processor={processor as StreamTokenizer} ctx={ctx} />
+      )}
     </div>
   );
 };
