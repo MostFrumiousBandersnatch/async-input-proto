@@ -2,6 +2,7 @@ import React, {
   ChangeEvent,
   KeyboardEvent,
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -16,7 +17,7 @@ import { ParsedSnapshot, TokenWithSuggestions } from '@widget/engine/types';
 import './input.scss';
 import { cyclicShift } from '@widget/utils/misc';
 import { getActualVariants, isEdgeToken } from '@widget/engine/utils';
-
+import { InputContext } from '@widget/components/input/ctx';
 
 interface InputProps {
   snapshot: ParsedSnapshot | null;
@@ -124,6 +125,8 @@ export const Input = React.memo(function Input({
     ]
   );
 
+  const { debug, hint } = useContext(InputContext);
+
   return (
     <div className={classNames(['async-input', { loading }])}>
       <div className="layer tags">
@@ -146,7 +149,12 @@ export const Input = React.memo(function Input({
         onKeyDown={onKeyDown}
         onSelect={onSelectionChange}
       />
-      <div className="spinner" />
+      <div
+        className="hint"
+        style={{ visibility: debug ? 'visible' : 'hidden' }}
+      >
+        {hint}
+      </div>
     </div>
   );
 });

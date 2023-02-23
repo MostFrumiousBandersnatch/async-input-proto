@@ -136,6 +136,7 @@ export const dummyTokenStreamProcessor =
           subscriber.complete();
         }
       });
+
       return () => {
         state.cancel = true;
       };

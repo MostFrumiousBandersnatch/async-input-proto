@@ -3,11 +3,13 @@
   min-width: 320px;
   margin: 128px auto;
 
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+
   .token.focused.debug {
     background-color: #e8a1a1 !important;
   }
 }
 
 #settings {
-  margin-top: 15px;
+  margin-bottom: 15px;
 }
