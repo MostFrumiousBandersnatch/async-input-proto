@@ -3,9 +3,13 @@
 $input-base-height: 42px;
 $input-padding: 4px;
 $input-font-size: 25px;
+$input-border-radius: 2px;
 $input-text-color: $primary-color;
 $input-border-color: $aux-color;
 
-$token-upper-gap: 4px;
+$role-font-size: 10px;
+$role-padding: 2px;
+$role-height: $role-font-size + 2 * $role-padding;
+
 $token-bg-opacity: 0.5;
 $token-border-radius: 2px;

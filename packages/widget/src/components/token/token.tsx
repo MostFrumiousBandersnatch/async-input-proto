@@ -1,10 +1,14 @@
-
-import {InputContext} from '@widget/components/input/ctx';
+import { InputContext } from '@widget/components/input/ctx';
 import { TokenWithSuggestions } from '@widget/engine/types';
 import { repeat } from '@widget/utils/misc';
 import React, { useContext } from 'react';
 
 import './token.scss';
+
+const genClipPath = (role: string): string => {
+  const roleWidth = 6 * role.length + 4;
+  return `polygon(0 12px, calc(100% - ${roleWidth}px) 12px, calc(100% - ${roleWidth}px) 0, 100% 0, 100% 100%, 0 100%)`;
+};
 
 export interface TokenProps extends TokenWithSuggestions {
   highlighted: boolean;
@@ -32,13 +36,18 @@ export const Token = ({
         className={`token ${debug ? 'debug' : ''} ${
           highlighted ? 'focused' : ''
         }`}
-        data-role={role}
-        style={{
-          background: color,
-          color: debug ? 'inherit' : color,
-        }}
       >
-        {content}
+        <span
+          className="token-inner"
+          data-role={role}
+          style={{
+            background: color,
+            color: debug ? 'inherit' : 'transparent',
+            clipPath: genClipPath(role),
+          }}
+        >
+          {content}
+        </span>
         {variants?.length > 0 && (
           <ul className="variants">
             {variants.map((text, n) => (

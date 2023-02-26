@@ -15,6 +15,9 @@ export default [
         assetFileNames: '[name][extname]',
       },
     ],
+    watch: {
+      include: 'src/**'
+    },
     external: [...Object.keys(pkg.dependencies || {})],
     plugins: [
       ts({
