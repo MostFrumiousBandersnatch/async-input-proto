@@ -2,31 +2,37 @@
 
 @import 'src/styles/meta';
 
-
 .token {
-  display: inline-block;
-  border-radius: $token-border-radius;
-  border-width: 0px;
-  border-style: dashed;
+  &-inner {
+    height: 100%;
+    display: inline-flex;
+    flex-direction: column;
 
-  position: relative;
-  opacity: $token-bg-opacity;
+    border-radius: $token-border-radius;
+    border-width: 0px;
+    border-style: dashed;
 
-  &::before {
-    content: attr(data-role);
-    background: inherit;
-    color: $input-text-color;
+    position: relative;
+    opacity: $token-bg-opacity;
 
-    position: absolute;
-    line-height: initial;
-    top: -6px - $token-upper-gap;
-    right: 0px;
-    font-size: 10px;
-    padding: 0 2px;
-    border-radius: $token-border-radius  $token-border-radius 0px 0px;
+    &::after {
+      content: attr(data-role);
+      height: $role-height;
+      font-size: $role-font-size;
+      font-family: monospace;
+
+      color: $input-text-color;
+
+      position: absolute;
+      line-height: initial;
+      top: 0px;
+      right: 0px;
+      padding: 0 $role-padding;
+      border-radius: $token-border-radius $token-border-radius 0px 0px;
+    }
   }
 
-  >ul.variants {
+  > ul.variants {
     display: none;
     color: black;
     background-color: white;
@@ -34,17 +40,20 @@
     list-style: none;
     margin-top: 5px;
     padding: 0px;
+    line-height: normal;
 
-    >li.current {
+    > li.current {
       text-decoration: underline;
       background-color: lightgrey;
     }
   }
 
   &.focused {
-    opacity: 1;
+    & > .token-inner {
+      opacity: 1;
+    }
 
-    >ul.variants {
+    > ul.variants {
       display: block;
     }
   }

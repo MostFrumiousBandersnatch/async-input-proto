@@ -22,13 +22,13 @@
   }
 }
 
-.async-input {
-  $input-height: $input-base-height + $token-upper-gap;
+$input-height: $input-base-height + $input-padding;
 
+.async-input {
   position: relative;
   height: $input-height;
   border: 1px solid $input-border-color;
-  border-radius: 2px;
+  border-radius: $input-border-radius;
 
   // spinner
   &::after {
@@ -74,29 +74,31 @@
 
 .layer {
   position: absolute;
-  top: $token-upper-gap;
+  top: 0px;
   bottom: 0px;
   left: 0px;
   right: 0px;
+
+  height: #{$input-height - 2 * $input-padding};
 
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
     Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   font-size: $input-font-size;
   font-weight: 300;
-  padding: #{14px - 4px} $input-padding $input-padding !important;
+  padding: $input-padding;
   width: calc(100% - #{2 * $input-padding});
-  line-height: #{$input-font-size + 1px};
   border: 1px solid transparent;
   white-space: pre;
 
   &.tags {
     display: flex;
+    line-height: #{$input-height + $input-padding};
   }
 }
 
 input.layer {
   display: block;
-  top: 2px;
+  padding-top: $role-font-size;
   background-color: transparent;
   color: $input-text-color;
   &:focus {
