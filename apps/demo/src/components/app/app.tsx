@@ -20,6 +20,7 @@ import './app.scss';
 export const App = () => {
   const [debug, toggleDebug] = useReducer(x => !x, true);
   const [slowFactor, setSlowFactor] = useState(1);
+  const [throttleFactor, setThrottleFactor] = useState(0);
   const [engine, setEngine] = useState<'async' | 'stream'>('async');
 
   const processor = useMemo(
@@ -31,8 +32,12 @@ export const App = () => {
   );
 
   const ctx = useMemo<InputContextType>(
-    () => ({ debug, hint: engine }),
-    [debug, engine]
+    () => ({
+      debug,
+      hint: engine,
+      debounceTime: throttleFactor * 100
+    }),
+    [debug, engine, throttleFactor]
   );
 
   return (
@@ -97,6 +102,23 @@ export const App = () => {
                 value={slowFactor}
                 onChange={evt => {
                   setSlowFactor(evt.target.valueAsNumber);
+                }}
+              />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label htmlFor="throttle">Throttle factor</label>
+            </td>
+            <td>
+              <input
+                type="range"
+                min="0"
+                max="5"
+                id="slow"
+                value={throttleFactor}
+                onChange={evt => {
+                  setThrottleFactor(evt.target.valueAsNumber);
                 }}
               />
             </td>
