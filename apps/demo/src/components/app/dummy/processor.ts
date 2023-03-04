@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import { Observable, Subscriber } from 'rxjs';
 
 import {
   AsyncTokenizer,
@@ -48,7 +48,7 @@ const SNAP_PATTERNS: TokenWithSuggestions[][] = [
       ghost: false,
     },
     {
-      content: '    ',
+      content: '        ',
       id: 'stub-action',
       spaceBefore: 1,
       start: 5,
@@ -60,7 +60,7 @@ const SNAP_PATTERNS: TokenWithSuggestions[][] = [
       ghost: true,
     },
     {
-      content: '      ',
+      content: '         ',
       id: 'stub-kind',
       spaceBefore: 1,
       start: 10,
@@ -106,11 +106,27 @@ export const dummyTokenProcessor =
     }
   };
 
+interface StreamState {
+  cancel: boolean;
+}
+
+const pushToStream = (
+  subscriber: Subscriber<ParsedSnapshot>,
+  state: StreamState,
+  snapshot: ParsedSnapshot
+): void => {
+  if (state.cancel || subscriber.closed) {
+    subscriber.complete();
+  } else {
+    subscriber.next(snapshot);
+  }
+};
+
 export const dummyTokenStreamProcessor =
   (options: FakeTokenProcessorOptions): StreamTokenizer =>
   raw =>
     new Observable(subscriber => {
-      const state = { cancel: false };
+      const state: StreamState = { cancel: false };
       const vanilla = tokenProcessor(raw);
       const smart = snapshotInjectors(vanilla);
 
@@ -119,7 +135,9 @@ export const dummyTokenStreamProcessor =
       delay(del * 200).then(() => {
         const twoSteps = smart !== vanilla;
 
-        subscriber.next(
+        pushToStream(
+          subscriber,
+          state,
           withTokenInjectors(tokenInjectors)(
             (twoSteps ? withAsterisks : withSharps)(colorizeSnapshot(vanilla))
           )
@@ -127,9 +145,7 @@ export const dummyTokenStreamProcessor =
 
         if (twoSteps) {
           delay(del * 1000).then(() => {
-            if (!state.cancel) {
-              subscriber.next(smart);
-            }
+            pushToStream(subscriber, state, smart);
             subscriber.complete();
           });
         } else {

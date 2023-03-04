@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { mergeMap, Observable, Subscriber } from 'rxjs';
+import { debounceTime, identity, mergeMap, Observable, Subscriber } from 'rxjs';
 
 import { StreamTokenizer } from '@widget/engine/types';
 
-import {Input} from '@widget/components/input/input';
+import { Input } from '@widget/components/input/input';
 import { InputContext, InputContextType } from '@widget/components/input/ctx';
 
 export interface StreamInputProps {
@@ -19,12 +19,15 @@ export const StreamInput: React.FC<StreamInputProps> = ({ processor, ctx }) => {
     new Observable<string>(subscriber => {
       sourceRef.current = subscriber;
     })
-      .pipe(mergeMap(processor))
+      .pipe(
+        ctx.debounceTime > 0 ? debounceTime(ctx.debounceTime) : identity,
+        mergeMap(processor)
+      )
       .subscribe(setCurrSnapshot);
-  }, [setCurrSnapshot, processor]);
+  }, [setCurrSnapshot, processor, ctx]);
 
   const onChange = (raw: string) => {
-    if (sourceRef.current && raw) {
+    if (sourceRef.current) {
       sourceRef.current.next(raw);
     }
   };
