@@ -32,6 +32,15 @@ const tokenInjectors = withInjectors<TokenWithSuggestions>([
           role: '$$$',
         }
       : token,
+  token =>
+    token.content === 'bee'
+      ? {
+          ...token,
+          color:
+            'repeating-linear-gradient(-45deg, gold 0 10px, grey 10px 20px)',
+          role: 'z-z-z',
+        }
+      : token,
 ]);
 
 const SNAP_PATTERNS: TokenWithSuggestions[][] = [
