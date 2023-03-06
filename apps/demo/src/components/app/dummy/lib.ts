@@ -18,8 +18,8 @@ const pickColor = (token: Token): string =>
 export const colorizeSnapshot: Injector<ParsedSnapshot> = snap => ({
   ...snap,
   parsed: snap.parsed.map(token => ({
-    ...token,
     color: pickColor(token),
+    ...token,
   })),
 });
 
