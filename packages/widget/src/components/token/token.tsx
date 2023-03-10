@@ -5,7 +5,7 @@ import React, { useContext } from 'react';
 
 import './token.scss';
 
-const genClipPath = (role: string): string => {
+const genClipPath = (role = ''): string => {
   const roleWidth = 6 * role.length + 4;
   return `polygon(0 12px, calc(100% - ${roleWidth}px) 12px, calc(100% - ${roleWidth}px) 0, 100% 0, 100% 100%, 0 100%)`;
 };
