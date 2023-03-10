@@ -34,6 +34,7 @@ export const App = () => {
   const ctx = useMemo<InputContextType>(
     () => ({
       debug,
+      placeholder: 'start here...',
       hint: engine,
       debounceTime: throttleFactor * 100
     }),
