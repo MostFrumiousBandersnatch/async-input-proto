@@ -125,7 +125,7 @@ export const Input = React.memo(function Input({
     ]
   );
 
-  const { debug, hint } = useContext(InputContext);
+  const { debug, hint, placeholder } = useContext(InputContext);
 
   return (
     <div className={classNames(['async-input', { loading }])}>
@@ -144,6 +144,7 @@ export const Input = React.memo(function Input({
         type="text"
         className="layer"
         spellCheck="false"
+        placeholder={placeholder}
         ref={inputRef}
         onChange={onInput}
         onKeyDown={onKeyDown}
