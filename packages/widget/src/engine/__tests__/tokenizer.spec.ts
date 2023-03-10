@@ -1,4 +1,4 @@
-import { tokenProcessor } from './tokenizer';
+import { tokenProcessor } from '../tokenizer';
 
 describe('tokenizer', () => {
   const raw = 'lorem ipsum';
