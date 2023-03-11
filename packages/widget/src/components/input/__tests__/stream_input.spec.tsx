@@ -47,5 +47,4 @@ describe('stream input', () => {
     expect(screen.queryByText('lorem').className).toBe('token-inner');
     expect(screen.queryByText('ipsum').className).toBe('token-inner');
   });
-
 });
