@@ -14,11 +14,14 @@ export interface AsyncInputProps {
 const buildProcessor = (
   innerProcessor: AsyncTokenizer,
   onChange: (snap: ParsedSnapshot) => void,
+  setLoading: (_: boolean) => void,
   ctx: InputContextType
 ): ((raw: string) => Promise<void>) => {
   const process = async (raw: string) => {
+    setLoading(true);
     const snapshot = await innerProcessor(raw);
     onChange(snapshot);
+    setLoading(false);
   };
 
   if (ctx.debounceTime > 0) {
@@ -30,6 +33,7 @@ const buildProcessor = (
 
 export const AsyncInput: React.FC<AsyncInputProps> = ({ processor, ctx }) => {
   const [currSnapshot, setCurrSnapshot] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   //ugly trick to decouple underlying input from processor's instance
   const processorRef = useRef(processor);
@@ -40,13 +44,18 @@ export const AsyncInput: React.FC<AsyncInputProps> = ({ processor, ctx }) => {
 
   //eslint-disable-next-line react-hooks/exhaustive-deps
   const process = useCallback(
-    buildProcessor(processorRef.current, setCurrSnapshot, ctx),
+    buildProcessor(
+      processorRef.current,
+      setCurrSnapshot,
+      setLoading,
+      ctx
+    ),
     [processorRef, setCurrSnapshot, ctx]
   );
 
   return (
     <InputContext.Provider value={ctx}>
-      <Input snapshot={currSnapshot} onChange={process} />
+      <Input snapshot={currSnapshot} onChange={process} loading={loading} />
     </InputContext.Provider>
   );
 };

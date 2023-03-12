@@ -22,14 +22,15 @@ import { InputContext } from '@widget/components/input/ctx';
 interface InputProps {
   snapshot: ParsedSnapshot | null;
   onChange: (value: string) => void;
+  loading: boolean;
 }
 
 export const Input = React.memo(function Input({
   snapshot,
   onChange,
+  loading
 }: InputProps) {
   const [tokens, setTokens] = useState([]);
-  const [loading, setLoading] = useState(false);
   const inputRef = useRef();
   const [selection, setSelection] = useState<[number, number]>([0, 0]);
 
@@ -38,7 +39,6 @@ export const Input = React.memo(function Input({
 
     if (snapshot?.raw === input.value) {
       setTokens(snapshot.parsed);
-      setLoading(false);
     }
   }, [snapshot]);
 
@@ -46,7 +46,6 @@ export const Input = React.memo(function Input({
     (evt: ChangeEvent<HTMLInputElement>) => {
       const raw = evt.target.value;
       onChange(raw);
-      setLoading(true);
     },
     [onChange]
   );
@@ -128,7 +127,10 @@ export const Input = React.memo(function Input({
   const { debug, hint, placeholder } = useContext(InputContext);
 
   return (
-    <div className={classNames(['async-input', { loading }])}>
+    <div
+      className={classNames(['async-input', { loading }])}
+      {...(debug ? { 'data-testid': 'asyncInputRoot' } : {})}
+    >
       <div className="layer tags">
         {tokens.map(token => (
           <Token
