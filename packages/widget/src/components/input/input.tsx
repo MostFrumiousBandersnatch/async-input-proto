@@ -28,7 +28,7 @@ interface InputProps {
 export const Input = React.memo(function Input({
   snapshot,
   onChange,
-  loading
+  loading,
 }: InputProps) {
   const [tokens, setTokens] = useState([]);
   const inputRef = useRef();
@@ -78,6 +78,26 @@ export const Input = React.memo(function Input({
     setCurrVariant(0);
   }, [currVariants]);
 
+  const append = useCallback(
+    (str: string) => {
+      //TODO: decouple from currVariant
+      const isAtEdge = isEdgeToken(snapshot, currToken);
+      const input = inputRef.current as HTMLInputElement;
+
+      input.setRangeText(
+        str + (isAtEdge ? ' ' : ''),
+        currToken.start,
+        currToken.end,
+        'end'
+      );
+
+      onChange(input.value);
+
+      input.focus();
+    },
+    [snapshot, currToken, onChange]
+  );
+
   const onKeyDown = useCallback(
     (evt: KeyboardEvent<HTMLInputElement>) => {
       if (inputRef.current && currVariants?.length > 0) {
@@ -97,30 +117,17 @@ export const Input = React.memo(function Input({
           case 'Tab':
           case 'Enter': {
             evt.preventDefault();
-            //TODO: decouple from currVariant
-            const isAtEdge = isEdgeToken(snapshot, currToken);
-            const input = inputRef.current as HTMLInputElement;
-
-            input.setRangeText(
-              currVariants[currVariant] + (isAtEdge ? ' ' : ''),
-              currToken.start,
-              currToken.end,
-              'end'
-            );
-
-            onChange(input.value);
+            append(currVariants[currVariant]);
           }
         }
       }
     },
     [
-      snapshot,
-      currToken,
       currVariants,
       setCurrVariant,
       inputRef,
       currVariant,
-      onChange,
+      append
     ]
   );
 
@@ -139,6 +146,7 @@ export const Input = React.memo(function Input({
             key={token.id}
             highlighted={token.id === currToken?.id}
             currVariant={currVariant}
+            applyVariant={append}
           />
         ))}
       </div>

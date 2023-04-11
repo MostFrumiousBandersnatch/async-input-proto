@@ -13,6 +13,7 @@ const genClipPath = (role = ''): string => {
 export interface TokenProps extends TokenWithSuggestions {
   highlighted: boolean;
   currVariant: number;
+  applyVariant: (_: string) => void;
 }
 
 export const Token = ({
@@ -23,6 +24,7 @@ export const Token = ({
   highlighted,
   variants = [],
   currVariant,
+  applyVariant,
 }: TokenProps) => {
   const { debug } = useContext(InputContext);
 
@@ -51,7 +53,16 @@ export const Token = ({
         {variants?.length > 0 && (
           <ul className="variants">
             {variants.map((text, n) => (
-              <li key={text} className={currVariant === n ? 'current' : ''}>
+              <li
+                key={text}
+                className={currVariant === n ? 'current' : ''}
+                onClick={evt => {
+                  evt.preventDefault();
+                  evt.stopPropagation();
+
+                  applyVariant(text);
+                }}
+              >
                 {text}
               </li>
             ))}

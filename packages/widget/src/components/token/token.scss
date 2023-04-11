@@ -42,9 +42,13 @@
     padding: 0px;
     line-height: normal;
 
-    > li.current {
-      text-decoration: underline;
-      background-color: lightgrey;
+    > li {
+      cursor: pointer;
+
+      &.current {
+        text-decoration: underline;
+        background-color: lightgrey;
+      }
     }
   }
 
