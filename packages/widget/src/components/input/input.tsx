@@ -19,13 +19,13 @@ import { cyclicShift } from '@widget/utils/misc';
 import { getActualVariants, isEdgeToken } from '@widget/engine/utils';
 import { InputContext } from '@widget/components/input/ctx';
 
-interface InputProps {
+export interface InputProps {
   snapshot: ParsedSnapshot | null;
   onChange: (value: string) => void;
   loading: boolean;
 }
 
-export const Input = React.memo(function Input({
+export const Input: React.FC<InputProps> = React.memo(function Input({
   snapshot,
   onChange,
   loading,

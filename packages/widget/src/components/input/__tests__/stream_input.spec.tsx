@@ -8,8 +8,7 @@ import '@testing-library/jest-dom';
 import { InputContextType } from '@widget/components/input/ctx';
 import { StreamInput } from '@widget/components/input/stream_input';
 import { StreamTokenizer } from '@widget/engine/types';
-import { tokenProcessor } from '@widget/engine/tokenizer';
-import exp from 'constants';
+import {toTokens} from '@widget/engine/tokenizer';
 
 const PLACEHOLDER = '...';
 
@@ -19,7 +18,7 @@ const baseCtx: InputContextType = {
 };
 
 const dummyProcessor: StreamTokenizer = (raw: string) =>
-  of(tokenProcessor(raw));
+  of(toTokens(raw));
 
 describe('stream input', () => {
   test('continous input', async () => {
@@ -54,7 +53,7 @@ describe('stream input', () => {
     let roleGenerator: Subject<string>;
     const muppetProcessor: StreamTokenizer = (raw: string) =>
       new Observable(subscriber => {
-        const snap = tokenProcessor(raw);
+        const snap = toTokens(raw);
         roleGenerator = new Subject();
 
         roleGenerator.asObservable().subscribe({

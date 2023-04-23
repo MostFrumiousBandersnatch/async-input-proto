@@ -6,7 +6,7 @@ export const breakString = (raw: string): string[] =>
 export const genTokenId = (token: Token): string =>
   `${token.content}_${token.start}`;
 
-export const tokenProcessor: Tokenizer = raw => {
+export const toTokens: Tokenizer = raw => {
   const tokens = breakString(raw).reduce<TokenWithSuggestions[]>(
     (parsed, rawPart) => {
       const prev = parsed.at(-1);
