@@ -1,0 +1,11 @@
+.app {
+  max-width: 640px;
+  min-width: 320px;
+  margin: 128px auto;
+
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+
+  .token.focused.debug>.token-inner {
+    background-color: #e8a1a1 !important;
+  }
+}

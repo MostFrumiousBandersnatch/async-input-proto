@@ -5,7 +5,7 @@ import {
   ParsedSnapshot,
   StreamTokenizer,
   TokenWithSuggestions,
-  tokenProcessor,
+  toTokens,
 } from '@async-input/widget';
 
 import {
@@ -100,7 +100,7 @@ const withSharps = embelisher('#');
 export const dummyTokenProcessor =
   (options: FakeTokenProcessorOptions): AsyncTokenizer =>
   async raw => {
-    const vanilla = tokenProcessor(raw);
+    const vanilla = toTokens(raw);
     const smart = snapshotInjectors(vanilla);
 
     const del = Math.random() * 1000;
@@ -136,7 +136,7 @@ export const dummyTokenStreamProcessor =
   raw =>
     new Observable(subscriber => {
       const state: StreamState = { cancel: false };
-      const vanilla = tokenProcessor(raw);
+      const vanilla = toTokens(raw);
       const smart = snapshotInjectors(vanilla);
 
       const del = Math.random() * options.slowFactor;

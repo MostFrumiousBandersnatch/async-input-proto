@@ -10,6 +10,7 @@
     "track-widget": "lerna run build-watch --scope=@async-input/widget",
     "start-demo": "lerna run start-dev --scope=@async-input/demo",
     "build-demo": "lerna run build --scope=@async-input/demo",
+    "build-widget": "lerna run build --scope=@async-input/widget",
     "test-widget": "lerna run test --scope=@async-input/widget",
     "run-all": "concurrently -rg --timings 'yarn track-widget' 'sleep 7 && yarn start-demo'"
   },

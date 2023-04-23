@@ -1,0 +1,26 @@
+ul.selector {
+  list-style: none;
+  padding-left: 0px;
+  overflow-y: auto;
+
+  &.empty {
+    max-height: 0px;
+    transition: max-height 0.5s;
+  }
+
+  &:not(.empty) {
+    max-height: 500px;
+    transition: max-height 0.5s;
+  }
+
+  > li.alternative {
+    cursor: pointer;
+    padding: 2px;
+
+    &.selected {
+      cursor: default;
+      border: 1px solid blue;
+      border-radius: 2px;
+    }
+  }
+}
