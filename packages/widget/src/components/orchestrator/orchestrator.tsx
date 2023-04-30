@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { MultipleResponse, StreamedInterpreter } from '@widget/engine/types';
 import {
-  OrchestratorContext,
+  OrchestratorContextAware,
   OrchestratorContextType,
+  processIterpretation,
 } from '@widget/components/orchestrator/ctx';
 import {
   combineLatestWith,
@@ -14,20 +15,21 @@ import {
   Subject,
 } from 'rxjs';
 
-interface OrchestratorProps {
-  interpreter: StreamedInterpreter;
+interface OrchestratorProps<D> extends OrchestratorContextAware<D> {
+  interpreter: StreamedInterpreter<D>;
   children: React.ReactElement;
 }
 
-export const Orchestrator: React.FC<OrchestratorProps> = ({
+export function Orchestrator<D>({
   interpreter,
   children,
-}) => {
+  contextInstance,
+}: OrchestratorProps<D>) {
   const [inputStream, setInputStream] = useState<Observer<string>>(null);
   const [alternativesStream, setAlternativesStream] =
     useState<Observer<string>>(null);
 
-  const intepreterStream = useMemo<Observable<MultipleResponse>>(() => {
+  const intepreterStream = useMemo<Observable<MultipleResponse<D>>>(() => {
     const stream = new Subject();
     setInputStream(stream);
     return stream.pipe(mergeMap(interpreter));
@@ -38,17 +40,18 @@ export const Orchestrator: React.FC<OrchestratorProps> = ({
     setAlternativesStream(stream);
 
     return intepreterStream.pipe(combineLatestWith(stream)).pipe(
-      map(([response, chosenAlternative]) => ({
-        raw: response.raw,
-        parsed: response.alternatives.find(
+      map(([response, chosenAlternative]) => {
+        const int = response.alternatives.find(
           ({ name }) => name === chosenAlternative
-        )?.snapshot,
-      })),
-      filter(({ parsed }) => !!parsed)
+        );
+
+        return int ? processIterpretation(response.raw, int) : undefined;
+      }),
+      filter(Boolean)
     );
   }, [intepreterStream]);
 
-  const ctx = useMemo<OrchestratorContextType>(
+  const ctxValue = useMemo<OrchestratorContextType<D>>(
     () => ({
       inputStream,
       intepreterStream,
@@ -57,9 +60,9 @@ export const Orchestrator: React.FC<OrchestratorProps> = ({
     }),
     [inputStream, intepreterStream, alternativesStream, feedbackStream]
   );
+  const CtxComp = contextInstance;
+
   return (
-    <OrchestratorContext.Provider value={ctx}>
-      {children}
-    </OrchestratorContext.Provider>
+    ctxValue && <CtxComp.Provider value={ctxValue}>{children}</CtxComp.Provider>
   );
-};
+}

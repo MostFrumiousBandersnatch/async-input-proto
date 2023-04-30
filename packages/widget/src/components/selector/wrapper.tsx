@@ -1,6 +1,5 @@
+import { OrchestratorContextAware } from '@widget/components/orchestrator/ctx';
 import React, { useContext, useEffect, useState } from 'react';
-
-import { OrchestratorContext } from '@widget/components/orchestrator/ctx';
 
 export interface AlternativesSelectorProps<T> {
   alternatives: T[];
@@ -8,14 +7,15 @@ export interface AlternativesSelectorProps<T> {
   onChange: (_: number) => void;
 }
 
-interface SelectorWrapperProps<T> {
+interface SelectorWrapperProps<T, D> extends OrchestratorContextAware<D> {
   selectorComp: React.FC<AlternativesSelectorProps<T>>;
 }
 
-export const SelectorWrapper = ({
+export function SelectorWrapper<D>({
   selectorComp,
-}: SelectorWrapperProps<string>) => {
-  const ctx = useContext(OrchestratorContext);
+  contextInstance,
+}: SelectorWrapperProps<string, D>) {
+  const ctx = useContext(contextInstance);
   const [alternatives, setAlternatives] = useState([]);
   const [selected, setSelected] = useState(0);
 
@@ -34,10 +34,10 @@ export const SelectorWrapper = ({
   }, [alternatives]);
 
   useEffect(() => {
-    if (ctx.alternativesStream) {
+    if (ctx) {
       ctx.alternativesStream.next(alternatives[selected]);
     }
   }, [alternatives, selected, ctx]);
 
   return selectorComp({ alternatives, onChange: setSelected, selected });
-};
+}

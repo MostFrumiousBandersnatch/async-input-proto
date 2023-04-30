@@ -43,15 +43,18 @@ export type Tokenizer = (raw: string) => ParsedSnapshot;
 export type AsyncTokenizer = (raw: string) => Promise<ParsedSnapshot>;
 export type StreamTokenizer = (raw: string) => Observable<ParsedSnapshot>;
 
-export interface Interpretation {
+export interface Interpretation<D> {
   name: string;
-  snapshot: TokenWithSuggestions[];
+  tokens: TokenWithSuggestions[];
+  data: D | null;
 }
 
-export interface MultipleResponse {
+export interface MultipleResponse<D> {
   raw: string;
-  alternatives: Interpretation[];
+  alternatives: Interpretation<D>[];
 }
 
-export type Interpreter = (raw: string) => MultipleResponse;
-export type StreamedInterpreter = (raw: string) => Observable<MultipleResponse>;
+export type Interpreter<D> = (raw: string) => MultipleResponse<D>;
+export type StreamedInterpreter<D> = (
+  raw: string
+) => Observable<MultipleResponse<D>>;

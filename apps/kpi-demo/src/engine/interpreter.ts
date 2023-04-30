@@ -1,7 +1,12 @@
 import { StreamedInterpreter, toTokens } from '@async-input/widget';
 import { of } from 'rxjs';
 
-export const KPIInterpreter: StreamedInterpreter = raw => {
+export interface KPIData {
+  title: string;
+  description?: string;
+}
+
+export const KPIInterpreter: StreamedInterpreter<KPIData> = raw => {
   const snap = toTokens(raw);
   const leadingToken = snap.parsed[0];
 
@@ -11,19 +16,21 @@ export const KPIInterpreter: StreamedInterpreter = raw => {
       alternatives: [
         {
           name: 'description',
-          snapshot: snap.parsed.map((token, i) => ({
+          tokens: snap.parsed.map((token, i) => ({
             ...token,
             color: 'lightgrey',
             role: i === 0 ? 'key' : '***',
           })),
+          data: { title: `description of ${leadingToken.content}` },
         },
         {
           name: 'formula',
-           snapshot: snap.parsed.map((token, i) => ({
+          tokens: snap.parsed.map((token, i) => ({
             ...token,
             color: 'lightblue',
             role: i === 0 ? 'key' : '***',
           })),
+          data: { title: `formula of ${leadingToken.content}` },
         },
       ],
     });
@@ -33,7 +40,8 @@ export const KPIInterpreter: StreamedInterpreter = raw => {
       alternatives: [
         {
           name: '???',
-          snapshot: snap.parsed,
+          tokens: snap.parsed,
+          data: null,
         },
       ],
     });
