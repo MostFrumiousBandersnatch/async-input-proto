@@ -1,12 +1,12 @@
 import React from 'react';
-import { Observable, Observer } from 'rxjs';
+import omit from 'lodash.omit';
 
-import {
+import type { Observable, Observer } from 'rxjs';
+import type {
   Interpretation,
   MultipleResponse,
   ParsedSnapshot,
-} from '@widget/engine/types';
-import { omit } from 'lodash';
+} from '@async-input/types';
 
 interface ProcessedInterptretation<D>
   extends Omit<Interpretation<D>, 'tokens'> {

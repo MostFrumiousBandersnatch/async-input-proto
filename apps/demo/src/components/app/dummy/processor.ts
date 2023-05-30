@@ -1,27 +1,34 @@
 import { Observable, Subscriber } from 'rxjs';
 
-import {
+import type {
   AsyncTokenizer,
   ParsedSnapshot,
   StreamTokenizer,
+  Token,
   TokenWithSuggestions,
-  toTokens,
-} from '@async-input/widget';
+} from '@async-input/types';
 
 import {
-  checkTokens,
   colorizeSnapshot,
   embelisher,
-  withTokenInjectors,
-  zipTokens,
-} from '@root/components/app/dummy/lib';
-import { delay } from '@root/utils/async';
+  makeInjectorOutOfSnapshotPattern,
+  withInjectors,
+  withTokenInjector,
+} from '@async-input/parsing_lib'
+import { toTokens } from '@async-input/parsing_lib';
 
-import { withInjectors } from './injectors';
+import { delay } from '@root/utils/async';
 
 interface FakeTokenProcessorOptions {
   slowFactor: number;
 }
+
+const COLORS = ['#9edcd0', '#9ac9ed', '#6980e5', '#c79df2'];
+
+const colorInjector = colorizeSnapshot(
+  //eslint-disable-next-line @typescript-eslint/no-unused-vars
+  (token: Token): string => COLORS[Math.floor(Math.random() * COLORS.length)]
+);
 
 const tokenInjectors = withInjectors<TokenWithSuggestions>([
   token =>
@@ -84,14 +91,7 @@ const SNAP_PATTERNS: TokenWithSuggestions[][] = [
 ];
 
 const snapshotInjectors = withInjectors<ParsedSnapshot>(
-  SNAP_PATTERNS.map(pattern => snap => {
-    if (checkTokens(snap.parsed, pattern)) {
-      return {
-        ...snap,
-        parsed: zipTokens(snap.parsed, pattern),
-      };
-    } else return snap;
-  })
+  SNAP_PATTERNS.map(makeInjectorOutOfSnapshotPattern)
 );
 
 const withAsterisks = embelisher('*');
@@ -107,8 +107,8 @@ export const dummyTokenProcessor =
     await delay(del * options.slowFactor);
 
     if (smart === vanilla) {
-      return withTokenInjectors(tokenInjectors)(
-        withSharps(colorizeSnapshot(vanilla))
+      return withTokenInjector(tokenInjectors)(
+        withSharps(colorInjector(vanilla))
       );
     } else {
       return smart;
@@ -147,8 +147,8 @@ export const dummyTokenStreamProcessor =
         pushToStream(
           subscriber,
           state,
-          withTokenInjectors(tokenInjectors)(
-            (twoSteps ? withAsterisks : withSharps)(colorizeSnapshot(vanilla))
+          withTokenInjector(tokenInjectors)(
+            (twoSteps ? withAsterisks : withSharps)(colorInjector(vanilla))
           )
         );
 

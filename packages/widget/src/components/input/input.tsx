@@ -12,11 +12,11 @@ import classNames from 'classnames';
 
 import { Token } from '@widget/components/token/token';
 
-import { ParsedSnapshot, TokenWithSuggestions } from '@widget/engine/types';
+import type { ParsedSnapshot, TokenWithSuggestions } from '@async-input/types';
 
 import './input.scss';
 import { cyclicShift } from '@widget/utils/misc';
-import { getActualVariants, isEdgeToken } from '@widget/engine/utils';
+import { getActualVariants, isEdgeToken } from '@widget/utils/tokens';
 import { InputContext } from '@widget/components/input/ctx';
 
 export interface InputProps {

@@ -7,8 +7,8 @@ import '@testing-library/jest-dom';
 
 import { InputContextType } from '@widget/components/input/ctx';
 import { StreamInput } from '@widget/components/input/stream_input';
-import { StreamTokenizer } from '@widget/engine/types';
-import {toTokens} from '@widget/engine/tokenizer';
+import type { StreamTokenizer } from '@async-input/types';
+import { toTokens } from '@async-input/parsing-lib/dist/tokenizer';
 
 const PLACEHOLDER = '...';
 
@@ -17,8 +17,7 @@ const baseCtx: InputContextType = {
   placeholder: PLACEHOLDER,
 };
 
-const dummyProcessor: StreamTokenizer = (raw: string) =>
-  of(toTokens(raw));
+const dummyProcessor: StreamTokenizer = (raw: string) => of(toTokens(raw));
 
 describe('stream input', () => {
   test('continous input', async () => {

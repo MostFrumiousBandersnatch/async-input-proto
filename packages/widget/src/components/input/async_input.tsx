@@ -3,8 +3,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Input } from '@widget/components/input/input';
 import { InputContext, InputContextType } from '@widget/components/input/ctx';
 
-import { AsyncTokenizer, ParsedSnapshot } from '@widget/engine/types';
-import { debounce } from 'lodash';
+import type { AsyncTokenizer, ParsedSnapshot } from '@async-input/types';
+import debounce from 'lodash.debounce';
 
 export interface AsyncInputProps {
   processor: AsyncTokenizer;

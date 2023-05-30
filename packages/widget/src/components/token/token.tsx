@@ -1,5 +1,5 @@
 import { InputContext } from '@widget/components/input/ctx';
-import { TokenWithSuggestions } from '@widget/engine/types';
+import { TokenWithSuggestions } from '@async-input/types';
 import { repeat } from '@widget/utils/misc';
 import React, { useContext } from 'react';
 

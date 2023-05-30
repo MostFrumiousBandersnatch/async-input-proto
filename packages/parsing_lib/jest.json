@@ -10,7 +10,7 @@
   },
   "moduleFileExtensions": ["ts", "tsx", "js", "jsx"],
   "transform": {
-    "^.+\\.(ts|tsx)$": "@swc/jest"
+    "^.+\\.(t|j)sx?$": "@swc/jest"
   },
   "transformIgnorePatterns": ["/node_modules/"],
   "testRegex": ".*\\.spec.(ts|tsx)$",

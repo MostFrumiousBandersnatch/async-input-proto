@@ -9,18 +9,22 @@
   "scripts": {
     "build": "yarn clean-dist && rollup -c rollup.config.mjs",
     "build-watch": "yarn clean-dist && rollup -c rollup.config.mjs -w",
+    "build-analyze": "ANALYZE=1 yarn build",
     "clean-dist": "rimraf dist/*",
     "lint": "eslint './src/**/*.ts?(x)'",
     "test-watch": "jest --watchAll --config=jest.json",
     "test": "jest --coverage --config=jest.json"
   },
   "devDependencies": {
+    "@async-input/types": "^0.0.1",
+    "@rollup/plugin-node-resolve": "^15.0.2",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.4.3",
     "@types/classnames": "^2.2.11",
     "@types/jest": "^26.0.3",
-    "@types/lodash": "^4.14.157",
+    "@types/lodash.debounce": "^4.0.7",
+    "@types/lodash.omit": "^4.5.7",
     "@types/node": "^14.0.14",
     "@types/react": "^18",
     "@typescript-eslint/eslint-plugin": "^5.30.7",
@@ -31,13 +35,15 @@
     "rollup-plugin-scss": "^4.0.0",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-ts": "^3.0.2",
+    "rollup-plugin-visualizer": "^5.9.0",
     "typescript": "^4.7.4",
     "whybundled": "^1.4.3"
   },
   "dependencies": {
     "classnames": "^2.3.2",
+    "lodash.debounce": "^4.0.8",
+    "lodash.omit": "^4.5.0",
     "react": "^18",
-    "react-dom": "^18",
-    "rxjs": "^7.8.0"
+    "rxjs": "7.8.1"
   }
 }

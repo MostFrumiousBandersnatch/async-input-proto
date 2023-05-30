@@ -1,4 +1,4 @@
-import { Token, Tokenizer, TokenWithSuggestions } from '@widget/engine/types';
+import { Token, Tokenizer, TokenWithSuggestions } from '@async-input/types';
 
 export const breakString = (raw: string): string[] =>
   raw.split(/\s+/).filter(token => token.length > 0);

@@ -3,25 +3,32 @@ import {
   ParsedToken,
   Token,
   TokenWithSuggestions,
-} from '@async-input/widget';
-import { Injector } from '@root/components/app/dummy/injectors';
-import { repeat } from '@root/utils/misc';
+} from '@async-input/types';
+import { repeat } from 'utils/misc';
 
-import identity from 'lodash/identity';
+type Injector<T> = (input: T) => T;
 
-const COLORS = ['#9edcd0', '#9ac9ed', '#6980e5', '#c79df2'];
+export const withInjectors =
+  <T>(injectors: Array<Injector<T>>) =>
+  (value: T): T =>
+    injectors.reduce((acc, inj) => inj(acc), value);
 
-//eslint-disable-next-line @typescript-eslint/no-unused-vars
-const pickColor = (token: Token): string =>
-  COLORS[Math.floor(Math.random() * COLORS.length)];
+export const withTokenInjector =
+  (tokenInjector: Injector<TokenWithSuggestions>): Injector<ParsedSnapshot> =>
+  snap => ({
+    ...snap,
+    parsed: snap.parsed.map(tokenInjector),
+  });
 
-export const colorizeSnapshot: Injector<ParsedSnapshot> = snap => ({
-  ...snap,
-  parsed: snap.parsed.map(token => ({
-    color: pickColor(token),
-    ...token,
-  })),
-});
+export const colorizeSnapshot =
+  (colorize: (_: Token) => string): Injector<ParsedSnapshot> =>
+  snap => ({
+    ...snap,
+    parsed: snap.parsed.map(token => ({
+      color: colorize(token),
+      ...token,
+    })),
+  });
 
 export const embelisher =
   (char: string): Injector<ParsedSnapshot> =>
@@ -37,13 +44,6 @@ export const embelisher =
             ),
           }),
     })),
-  });
-
-export const withTokenInjectors =
-  (tokenInjector: Injector<TokenWithSuggestions>): Injector<ParsedSnapshot> =>
-  snap => ({
-    ...snap,
-    parsed: snap.parsed.map(tokenInjector),
   });
 
 export const zipTokens = (
@@ -75,4 +75,15 @@ export const checkTokens = (
         return token?.content === specimen.content;
       }
     })
-    .every(identity);
+    .every(Boolean);
+
+export const makeInjectorOutOfSnapshotPattern =
+  (pattern: TokenWithSuggestions[]): Injector<ParsedSnapshot> =>
+  snap => {
+    if (checkTokens(snap.parsed, pattern)) {
+      return {
+        ...snap,
+        parsed: zipTokens(snap.parsed, pattern),
+      };
+    } else return snap;
+  };

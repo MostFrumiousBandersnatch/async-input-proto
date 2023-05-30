@@ -1,7 +1,9 @@
+
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+
 import { Input } from '@widget/components/input/input';
 import { OrchestratorContextAware } from '@widget/components/orchestrator/ctx';
-import { ParsedSnapshot } from '@widget/engine/types';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import type { ParsedSnapshot } from '@async-input/types';
 
 type InputWrapperProps<D> = OrchestratorContextAware<D>;
 

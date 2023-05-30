@@ -1,10 +1,4 @@
 import React, { useMemo, useState } from 'react';
-import { MultipleResponse, StreamedInterpreter } from '@widget/engine/types';
-import {
-  OrchestratorContextAware,
-  OrchestratorContextType,
-  processIterpretation,
-} from '@widget/components/orchestrator/ctx';
 import {
   combineLatestWith,
   filter,
@@ -14,6 +8,13 @@ import {
   Observer,
   Subject,
 } from 'rxjs';
+
+import type { MultipleResponse, StreamedInterpreter } from '@async-input/types';
+import {
+  OrchestratorContextAware,
+  OrchestratorContextType,
+  processIterpretation,
+} from '@widget/components/orchestrator/ctx';
 
 interface OrchestratorProps<D> extends OrchestratorContextAware<D> {
   interpreter: StreamedInterpreter<D>;

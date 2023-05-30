@@ -1,5 +1,6 @@
-import { OrchestratorContextAware } from '@widget/components/orchestrator/ctx';
+
 import React, { useContext, useEffect, useState } from 'react';
+import { OrchestratorContextAware } from '@widget/components/orchestrator/ctx';
 
 export interface AlternativesSelectorProps<T> {
   alternatives: T[];

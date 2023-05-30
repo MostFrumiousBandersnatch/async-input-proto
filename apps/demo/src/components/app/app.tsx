@@ -1,12 +1,16 @@
 import React, { useMemo, useReducer, useState } from 'react';
 
+import type {
+  AsyncTokenizer,
+  StreamTokenizer,
+} from '@async-input/types';
+
 import {
   AsyncInput,
-  AsyncTokenizer,
   InputContextType,
   StreamInput,
-  StreamTokenizer,
 } from '@async-input/widget';
+
 
 import {
   dummyTokenProcessor,

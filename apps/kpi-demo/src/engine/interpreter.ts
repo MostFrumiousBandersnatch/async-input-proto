@@ -1,4 +1,5 @@
-import { StreamedInterpreter, toTokens } from '@async-input/widget';
+import type { StreamedInterpreter } from '@async-input/types';
+import { toTokens } from '@async-input/parsing_lib';
 import { of } from 'rxjs';
 
 export interface KPIData {

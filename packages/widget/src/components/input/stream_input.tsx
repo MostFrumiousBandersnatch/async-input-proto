@@ -8,7 +8,7 @@ import {
   switchMap,
 } from 'rxjs';
 
-import { StreamTokenizer } from '@widget/engine/types';
+import type { StreamTokenizer } from '@async-input/types';
 
 import { Input } from '@widget/components/input/input';
 import { InputContext, InputContextType } from '@widget/components/input/ctx';
@@ -46,7 +46,7 @@ export const StreamInput: React.FC<StreamInputProps> = ({ processor, ctx }) => {
         ctx.debounceTime > 0 ? debounceTime(ctx.debounceTime) : identity,
         switchMap(withLoading(processor, setLoading))
       )
-      .subscribe(setCurrSnapshot);
+      .subscribe({ next: setCurrSnapshot });
   }, [setCurrSnapshot, processor, ctx]);
 
   const onChange = (raw: string) => {

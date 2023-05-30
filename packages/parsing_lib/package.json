@@ -1,0 +1,26 @@
+{
+  "name": "@async-input/parsing_lib",
+  "version": "0.0.1",
+  "description": "Various utilities for parsing requests and response generation",
+  "files": [
+    "dist/*",
+    "package.json"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "author": "Ivan Kondratyev <ivanbright@gmail.com>",
+  "license": "ISC",
+  "private": true,
+  "scripts": {
+    "build": "yarn clean-dist && rollup -c rollup.config.mjs",
+    "build-watch": "yarn clean-dist && rollup -c rollup.config.mjs -w",
+    "build-analyze": "ANALYZE=1 yarn build",
+    "clean-dist": "rimraf dist/*",
+    "lint": "eslint './src/**/*.ts?(x)'",
+    "test-watch": "jest --watchAll --config=jest.json",
+    "test": "jest --coverage --config=jest.json"
+  },
+  "devDependencies": {
+    "@async-input/types": "*"
+  }
+}

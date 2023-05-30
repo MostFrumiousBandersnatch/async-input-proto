@@ -1,4 +1,4 @@
-import {toTokens} from '@widget/engine/tokenizer';
+import {toTokens} from '../tokenizer';
 
 describe('tokenizer', () => {
   const raw = 'lorem ipsum';
