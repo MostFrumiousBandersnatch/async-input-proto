@@ -1,5 +1,5 @@
 import { InputContext } from '@widget/components/input/ctx';
-import { TokenWithSuggestions } from '@async-input/types';
+import { InterpretedToken } from '@async-input/types';
 import { repeat } from '@widget/utils/misc';
 import React, { useContext } from 'react';
 
@@ -10,7 +10,7 @@ const genClipPath = (role = ''): string => {
   return `polygon(0 12px, calc(100% - ${roleWidth}px) 12px, calc(100% - ${roleWidth}px) 0, 100% 0, 100% 100%, 0 100%)`;
 };
 
-export interface TokenProps extends TokenWithSuggestions {
+export interface TokenProps extends InterpretedToken {
   highlighted: boolean;
   currVariant: number;
   applyVariant: (_: string) => void;

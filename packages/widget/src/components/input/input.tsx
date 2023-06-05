@@ -12,7 +12,7 @@ import classNames from 'classnames';
 
 import { Token } from '@widget/components/token/token';
 
-import type { ParsedSnapshot, TokenWithSuggestions } from '@async-input/types';
+import type { InterpretedToken, InterpretedSnapshot } from '@async-input/types';
 
 import './input.scss';
 import { cyclicShift } from '@widget/utils/misc';
@@ -20,7 +20,7 @@ import { getActualVariants, isEdgeToken } from '@widget/utils/tokens';
 import { InputContext } from '@widget/components/input/ctx';
 
 export interface InputProps {
-  snapshot: ParsedSnapshot | null;
+  snapshot: InterpretedSnapshot | null;
   onChange: (value: string) => void;
   loading: boolean;
 }
@@ -38,7 +38,7 @@ export const Input: React.FC<InputProps> = React.memo(function Input({
     const input = inputRef.current as HTMLInputElement;
 
     if (snapshot?.raw === input.value) {
-      setTokens(snapshot.parsed);
+      setTokens(snapshot.interpreted);
     }
   }, [snapshot]);
 
@@ -60,9 +60,9 @@ export const Input: React.FC<InputProps> = React.memo(function Input({
     }
   }, [inputRef]);
 
-  const currToken = useMemo<TokenWithSuggestions | undefined>(() => {
+  const currToken = useMemo<InterpretedToken | undefined>(() => {
     if (snapshot && selection[0] === selection[1]) {
-      return snapshot.parsed.find(
+      return snapshot.interpreted.find(
         ({ start, end }) => selection[0] >= start && selection[0] <= end
       );
     }

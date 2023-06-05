@@ -7,8 +7,8 @@ import '@testing-library/jest-dom';
 
 import { InputContextType } from '@widget/components/input/ctx';
 import { StreamInput } from '@widget/components/input/stream_input';
-import type { StreamTokenizer } from '@async-input/types';
-import { toTokens } from '@async-input/parsing-lib/dist/tokenizer';
+import type { StreamProcessor } from '@async-input/types';
+import { parse, interpret } from '@async-input/parsing_lib';
 
 const PLACEHOLDER = '...';
 
@@ -17,7 +17,7 @@ const baseCtx: InputContextType = {
   placeholder: PLACEHOLDER,
 };
 
-const dummyProcessor: StreamTokenizer = (raw: string) => of(toTokens(raw));
+const dummyProcessor: StreamProcessor = (raw: string) => of(interpret(parse(raw)));
 
 describe('stream input', () => {
   test('continous input', async () => {
@@ -50,16 +50,16 @@ describe('stream input', () => {
 
   test('loading indicator', async () => {
     let roleGenerator: Subject<string>;
-    const muppetProcessor: StreamTokenizer = (raw: string) =>
+    const muppetProcessor: StreamProcessor = (raw: string) =>
       new Observable(subscriber => {
-        const snap = toTokens(raw);
+        const snap = interpret(parse(raw));
         roleGenerator = new Subject();
 
         roleGenerator.asObservable().subscribe({
           next: role => {
             subscriber.next({
               ...snap,
-              parsed: snap.parsed.map(token => ({ ...token, role })),
+              interpreted: snap.interpreted.map(token => ({ ...token, role })),
             });
           },
           complete: () => {

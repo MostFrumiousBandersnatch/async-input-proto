@@ -3,17 +3,17 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Input } from '@widget/components/input/input';
 import { InputContext, InputContextType } from '@widget/components/input/ctx';
 
-import type { AsyncTokenizer, ParsedSnapshot } from '@async-input/types';
+import type { AsyncProcessor, InterpretedSnapshot} from '@async-input/types';
 import debounce from 'lodash.debounce';
 
 export interface AsyncInputProps {
-  processor: AsyncTokenizer;
+  processor: AsyncProcessor;
   ctx: InputContextType;
 }
 
 const buildProcessor = (
-  innerProcessor: AsyncTokenizer,
-  onChange: (snap: ParsedSnapshot) => void,
+  innerProcessor: AsyncProcessor,
+  onChange: (snap: InterpretedSnapshot) => void,
   setLoading: (_: boolean) => void,
   ctx: InputContextType
 ): ((raw: string) => Promise<void>) => {

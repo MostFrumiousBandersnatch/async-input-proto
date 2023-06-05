@@ -1,38 +1,43 @@
-import { Token, Tokenizer, TokenWithSuggestions } from '@async-input/types';
+import {
+  Interpreter,
+  ParsedSnapshot,
+  ParsedToken,
+  Tokenizer,
+} from '@async-input/types';
 
 export const breakString = (raw: string): string[] =>
   raw.split(/\s+/).filter(token => token.length > 0);
 
-export const genTokenId = (token: Token): string =>
+export const genTokenId = (token: ParsedToken): string =>
   `${token.content}_${token.start}`;
 
-export const toTokens: Tokenizer = raw => {
-  const tokens = breakString(raw).reduce<TokenWithSuggestions[]>(
-    (parsed, rawPart) => {
-      const prev = parsed.at(-1);
-      const start = raw.indexOf(rawPart, prev?.end || 0);
+export const parse: Tokenizer = raw => {
+  const tokens = breakString(raw).reduce<ParsedToken[]>((parsed, rawPart) => {
+    const prev = parsed.at(-1);
+    const start = raw.indexOf(rawPart, prev?.end || 0);
 
-      const token: Token = {
-        content: rawPart,
-        start: start,
-        end: start + rawPart.length,
-        spaceBefore: prev ? start - prev.end : start,
-        ghost: false,
-      };
+    parsed.push({
+      content: rawPart,
+      start: start,
+      end: start + rawPart.length,
+      spaceBefore: prev ? start - prev.end : start,
+    });
 
-      return [
-        ...parsed,
-        {
-          ...token,
-          id: genTokenId(token),
-        },
-      ];
-    },
-    []
-  );
+    return parsed;
+  }, []);
 
   return {
     raw,
     parsed: tokens,
   };
 };
+
+//default interpretation
+export const interpret: Interpreter = (snap: ParsedSnapshot) => ({
+  ...snap,
+  interpreted: snap.parsed.map(token => ({
+    ...token,
+    id: genTokenId(token),
+    ghost: false,
+  })),
+});

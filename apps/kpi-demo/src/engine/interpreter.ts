@@ -1,5 +1,16 @@
-import type { StreamedInterpreter } from '@async-input/types';
-import { toTokens } from '@async-input/parsing_lib';
+import type {
+  InterpretedSnapshot,
+  ParsedSnapshot,
+  StreamMultiProcessor,
+  TemplateToken,
+} from '@async-input/types';
+import {
+  checkTokens,
+  makeInjectorOutOfSnapshotPattern,
+  parse,
+  interpret,
+  withInjectors,
+} from '@async-input/parsing_lib';
 import { of } from 'rxjs';
 
 export interface KPIData {
@@ -7,33 +18,69 @@ export interface KPIData {
   description?: string;
 }
 
-export const KPIInterpreter: StreamedInterpreter<KPIData> = raw => {
-  const snap = toTokens(raw);
-  const leadingToken = snap.parsed[0];
+const DESCR_SNAP_PATTERNS: TemplateToken[] = [
+  {
+    id: 'trigger',
+    role: 'key',
+    variants: ['roas', 'roi', 'cpm', 'cpc'],
+    optional: false
+  },
+];
 
-  if (['roas', 'roi', 'cpm', 'cpc'].includes(leadingToken?.content)) {
+const FRML_SNAP_PATTERNS: TemplateToken[] = [
+  {
+    id: 'trigger',
+    role: 'key',
+    variants: ['roas', 'roi', 'cpm', 'cpc'],
+    optional: false,
+  },
+  {
+    id: 'ds-stub',
+    role: 'data source',
+    variants: ['google', 'big-query'],
+    optional: true
+  }
+];
+
+
+const descSnapshotInjectors = withInjectors<InterpretedSnapshot>(
+  [makeInjectorOutOfSnapshotPattern(DESCR_SNAP_PATTERNS)]
+);
+
+const frmlSnapshotInjectors = withInjectors<InterpretedSnapshot>(
+  [makeInjectorOutOfSnapshotPattern(FRML_SNAP_PATTERNS)]
+);
+
+export const KPIInterpreter: StreamMultiProcessor<KPIData> = raw => {
+  const snap = interpret(parse(raw));
+  const leadingToken = snap.interpreted[0];
+
+
+  const alternatives = [];
+
+  const withDescr = descSnapshotInjectors(snap);
+  if (withDescr !== snap) {
+    alternatives.push({
+      name: 'description',
+      tokens: withDescr.interpreted,
+      data: { title: `description of ${leadingToken.content}` },
+    });
+  }
+
+  const withFormula = frmlSnapshotInjectors(snap);
+
+  if (withFormula !== snap) {
+    alternatives.push( {
+      name: 'formula',
+      tokens: withFormula.interpreted,
+      data: { title: `formula of ${leadingToken.content}` },
+    });
+  }
+
+  if (alternatives.length > 0) {
     return of({
       raw: snap.raw,
-      alternatives: [
-        {
-          name: 'description',
-          tokens: snap.parsed.map((token, i) => ({
-            ...token,
-            color: 'lightgrey',
-            role: i === 0 ? 'key' : '***',
-          })),
-          data: { title: `description of ${leadingToken.content}` },
-        },
-        {
-          name: 'formula',
-          tokens: snap.parsed.map((token, i) => ({
-            ...token,
-            color: 'lightblue',
-            role: i === 0 ? 'key' : '***',
-          })),
-          data: { title: `formula of ${leadingToken.content}` },
-        },
-      ],
+      alternatives
     });
   } else {
     return of({
@@ -41,7 +88,7 @@ export const KPIInterpreter: StreamedInterpreter<KPIData> = raw => {
       alternatives: [
         {
           name: '???',
-          tokens: snap.parsed,
+          tokens: snap.interpreted,
           data: null,
         },
       ],

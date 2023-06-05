@@ -1,8 +1,9 @@
 import {
+  InterpretedSnapshot,
+  InterpretedToken,
   ParsedSnapshot,
   ParsedToken,
-  Token,
-  TokenWithSuggestions,
+  TemplateToken,
 } from '@async-input/types';
 import { repeat } from 'utils/misc';
 
@@ -14,55 +15,74 @@ export const withInjectors =
     injectors.reduce((acc, inj) => inj(acc), value);
 
 export const withTokenInjector =
-  (tokenInjector: Injector<TokenWithSuggestions>): Injector<ParsedSnapshot> =>
+  (tokenInjector: Injector<InterpretedToken>): Injector<InterpretedSnapshot> =>
   snap => ({
     ...snap,
-    parsed: snap.parsed.map(tokenInjector),
+    interpreted: snap.interpreted.map(tokenInjector),
   });
 
 export const colorizeSnapshot =
-  (colorize: (_: Token) => string): Injector<ParsedSnapshot> =>
-  snap => ({
-    ...snap,
-    parsed: snap.parsed.map(token => ({
-      color: colorize(token),
-      ...token,
-    })),
-  });
+  (colorize: (_: InterpretedToken) => string): Injector<InterpretedSnapshot> =>
+  withTokenInjector(token => ({
+    color: colorize(token),
+    ...token,
+  }));
 
 export const embelisher =
-  (char: string): Injector<ParsedSnapshot> =>
-  snap => ({
-    ...snap,
-    parsed: snap.parsed.map(token => ({
-      ...token,
-      ...(token.role
-        ? {}
-        : {
-            role: repeat(char.charAt(0), token.content.length > 2 ? 3 : 1).join(
-              ''
-            ),
-          }),
-    })),
-  });
+  (char: string): Injector<InterpretedSnapshot> =>
+  withTokenInjector(token => ({
+    ...token,
+    ...(token.role
+      ? {}
+      : {
+          role: repeat(char.charAt(0), token.content.length > 2 ? 3 : 1).join(
+            ''
+          ),
+        }),
+  }));
+
+
+const makeGhostToken = (specimen: TemplateToken, position: number): InterpretedToken => {
+  const stubLength = specimen.role.length + 2;
+
+  return {
+    ...specimen,
+    content: repeat(' ', stubLength).join(''),
+    spaceBefore: 1,
+    start: position,
+    end: position + stubLength,
+    ghost: true
+  }
+}
+
+
+const makeMaterializedToken = (specimen: TemplateToken, token: ParsedToken): InterpretedToken => ({
+  ...specimen,
+  ...token,
+  ghost: false
+})
 
 export const zipTokens = (
   source: ParsedToken[],
-  pattern: TokenWithSuggestions[]
-): TokenWithSuggestions[] =>
-  pattern.map((stub, n) => ({
-    ...stub,
-    ...(n < source.length && source[n].content.length > 0 ? source[n] : {}),
-  }));
+  pattern: TemplateToken[]
+): InterpretedToken[] =>
+  pattern.reduce((acc, specimen, n) => {
+    const parsed = source[n];
+    const token = parsed
+      ? makeMaterializedToken(specimen, parsed)
+      : makeGhostToken(specimen, (acc.at(-1)?.end || 0) + 1);
+    acc.push(token);
+    return acc;
+  }, []);
 
 export const checkTokens = (
   source: ParsedToken[],
-  pattern: TokenWithSuggestions[]
+  pattern: TemplateToken[]
 ): boolean =>
   pattern
     .map((specimen, n) => {
       const token = source[n];
-      if (specimen.ghost) {
+      if (specimen.optional) {
         switch (true) {
           case !token:
             return true;
@@ -72,18 +92,18 @@ export const checkTokens = (
             return specimen.variants.some(v => v === token.content);
         }
       } else {
-        return token?.content === specimen.content;
+        return specimen.variants.includes(token?.content);
       }
     })
     .every(Boolean);
 
 export const makeInjectorOutOfSnapshotPattern =
-  (pattern: TokenWithSuggestions[]): Injector<ParsedSnapshot> =>
+  (pattern: TemplateToken[]): Injector<InterpretedSnapshot> =>
   snap => {
-    if (checkTokens(snap.parsed, pattern)) {
+    if (checkTokens(snap.interpreted, pattern)) {
       return {
         ...snap,
-        parsed: zipTokens(snap.parsed, pattern),
+        interpreted: zipTokens(snap.interpreted, pattern),
       };
     } else return snap;
   };

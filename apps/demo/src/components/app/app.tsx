@@ -1,8 +1,7 @@
 import React, { useMemo, useReducer, useState } from 'react';
 
 import type {
-  AsyncTokenizer,
-  StreamTokenizer,
+  AsyncProcessor, StreamProcessor
 } from '@async-input/types';
 
 import {
@@ -131,10 +130,10 @@ export const App = () => {
         </tbody>
       </table>
       {engine === 'async' && (
-        <AsyncInput processor={processor as AsyncTokenizer} ctx={ctx} />
+        <AsyncInput processor={processor as AsyncProcessor} ctx={ctx} />
       )}
       {engine === 'stream' && (
-        <StreamInput processor={processor as StreamTokenizer} ctx={ctx} />
+        <StreamInput processor={processor as StreamProcessor} ctx={ctx} />
       )}
     </div>
   );

@@ -3,13 +3,13 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import { Input } from '@widget/components/input/input';
 import { OrchestratorContextAware } from '@widget/components/orchestrator/ctx';
-import type { ParsedSnapshot } from '@async-input/types';
+import type { InterpretedSnapshot } from '@async-input/types';
 
 type InputWrapperProps<D> = OrchestratorContextAware<D>;
 
 export function InputWrapper<D>({ contextInstance }: InputWrapperProps<D>) {
   const ctx = useContext(contextInstance);
-  const [snapshot, setSnapshot] = useState<ParsedSnapshot>();
+  const [snapshot, setSnapshot] = useState<InterpretedSnapshot>();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {

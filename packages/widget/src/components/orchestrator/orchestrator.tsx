@@ -9,7 +9,7 @@ import {
   Subject,
 } from 'rxjs';
 
-import type { MultipleResponse, StreamedInterpreter } from '@async-input/types';
+import type { MultipleResponse, StreamMultiProcessor } from '@async-input/types';
 import {
   OrchestratorContextAware,
   OrchestratorContextType,
@@ -17,7 +17,7 @@ import {
 } from '@widget/components/orchestrator/ctx';
 
 interface OrchestratorProps<D> extends OrchestratorContextAware<D> {
-  interpreter: StreamedInterpreter<D>;
+  interpreter: StreamMultiProcessor<D>;
   children: React.ReactElement;
 }
 

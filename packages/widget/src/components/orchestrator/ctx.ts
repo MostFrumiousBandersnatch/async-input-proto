@@ -5,12 +5,12 @@ import type { Observable, Observer } from 'rxjs';
 import type {
   Interpretation,
   MultipleResponse,
-  ParsedSnapshot,
+  InterpretedSnapshot,
 } from '@async-input/types';
 
 interface ProcessedInterptretation<D>
   extends Omit<Interpretation<D>, 'tokens'> {
-  snapshot: ParsedSnapshot;
+  snapshot: InterpretedSnapshot;
 }
 
 export const processIterpretation = <D>(
@@ -20,7 +20,7 @@ export const processIterpretation = <D>(
   ...omit(int, 'tokens'),
   snapshot: {
     raw: source,
-    parsed: int.tokens,
+    interpreted: int.tokens,
   },
 });
 

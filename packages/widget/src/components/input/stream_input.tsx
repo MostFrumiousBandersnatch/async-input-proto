@@ -8,21 +8,21 @@ import {
   switchMap,
 } from 'rxjs';
 
-import type { StreamTokenizer } from '@async-input/types';
+import type { StreamProcessor } from '@async-input/types';
 
 import { Input } from '@widget/components/input/input';
 import { InputContext, InputContextType } from '@widget/components/input/ctx';
 
 export interface StreamInputProps {
-  processor: StreamTokenizer;
+  processor: StreamProcessor;
   ctx: InputContextType;
 }
 
 const withLoading =
   (
-    processor: StreamTokenizer,
+    processor: StreamProcessor,
     setLoading: (_: boolean) => void
-  ): StreamTokenizer =>
+  ): StreamProcessor =>
   (raw: string) => {
     setLoading(true);
 

@@ -1,11 +1,11 @@
 import { Observable, Subscriber } from 'rxjs';
 
 import type {
-  AsyncTokenizer,
-  ParsedSnapshot,
-  StreamTokenizer,
-  Token,
-  TokenWithSuggestions,
+  AsyncProcessor,
+  StreamProcessor,
+  InterpretedToken,
+  TemplateToken,
+  InterpretedSnapshot
 } from '@async-input/types';
 
 import {
@@ -14,8 +14,8 @@ import {
   makeInjectorOutOfSnapshotPattern,
   withInjectors,
   withTokenInjector,
-} from '@async-input/parsing_lib'
-import { toTokens } from '@async-input/parsing_lib';
+  parse, interpret
+} from '@async-input/parsing_lib';
 
 import { delay } from '@root/utils/async';
 
@@ -27,10 +27,10 @@ const COLORS = ['#9edcd0', '#9ac9ed', '#6980e5', '#c79df2'];
 
 const colorInjector = colorizeSnapshot(
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
-  (token: Token): string => COLORS[Math.floor(Math.random() * COLORS.length)]
+  (token: InterpretedToken): string => COLORS[Math.floor(Math.random() * COLORS.length)]
 );
 
-const tokenInjectors = withInjectors<TokenWithSuggestions>([
+const tokenInjectors = withInjectors<InterpretedToken>([
   token =>
     token.content === 'ip'
       ? {
@@ -50,47 +50,37 @@ const tokenInjectors = withInjectors<TokenWithSuggestions>([
       : token,
 ]);
 
-const SNAP_PATTERNS: TokenWithSuggestions[][] = [
+const SNAP_PATTERNS: TemplateToken[][] = [
   [
     {
-      content: 'beer',
-      id: 'stub-action',
-      spaceBefore: 0,
-      start: 0,
-      end: 4,
+
+      id: 'trigger',
       role: 'key',
       color:
         'linear-gradient(132deg, rgb(241, 242, 11) 0.00%, rgb(248, 161, 27) 100.00%)',
-      ghost: false,
+      variants: ['beer'],
+      optional: false
     },
     {
-      content: '        ',
       id: 'stub-action',
-      spaceBefore: 1,
-      start: 5,
-      end: 9,
       role: 'action',
       color:
         'linear-gradient(132deg, rgb(113, 143, 175) 0.00%, rgb(69, 92, 114) 100.00%)',
       variants: ['grab', 'find'],
-      ghost: true,
+      optional: true,
     },
     {
-      content: '         ',
       id: 'stub-kind',
-      spaceBefore: 1,
-      start: 10,
-      end: 17,
       role: 'kind',
       color:
         'linear-gradient(132deg, rgb(221, 2, 3) 0.00%, rgb(251, 137, 2) 20.00%, rgb(248, 235, 5) 40.00%, rgb(0, 127, 38) 60.00%, rgb(5, 75, 249) 80.00%, rgb(114, 6, 130) 100.00%)',
       variants: ['lager', 'porter', 'ale', 'blanche'],
-      ghost: true,
+      optional: true,
     },
   ],
 ];
 
-const snapshotInjectors = withInjectors<ParsedSnapshot>(
+const snapshotInjectors = withInjectors<InterpretedSnapshot>(
   SNAP_PATTERNS.map(makeInjectorOutOfSnapshotPattern)
 );
 
@@ -98,9 +88,9 @@ const withAsterisks = embelisher('*');
 const withSharps = embelisher('#');
 
 export const dummyTokenProcessor =
-  (options: FakeTokenProcessorOptions): AsyncTokenizer =>
+  (options: FakeTokenProcessorOptions): AsyncProcessor =>
   async raw => {
-    const vanilla = toTokens(raw);
+    const vanilla = interpret(parse(raw));
     const smart = snapshotInjectors(vanilla);
 
     const del = Math.random() * 1000;
@@ -120,9 +110,9 @@ interface StreamState {
 }
 
 const pushToStream = (
-  subscriber: Subscriber<ParsedSnapshot>,
+  subscriber: Subscriber<InterpretedSnapshot>,
   state: StreamState,
-  snapshot: ParsedSnapshot
+  snapshot: InterpretedSnapshot
 ): void => {
   if (state.cancel || subscriber.closed) {
     subscriber.complete();
@@ -132,11 +122,11 @@ const pushToStream = (
 };
 
 export const dummyTokenStreamProcessor =
-  (options: FakeTokenProcessorOptions): StreamTokenizer =>
+  (options: FakeTokenProcessorOptions): StreamProcessor =>
   raw =>
     new Observable(subscriber => {
       const state: StreamState = { cancel: false };
-      const vanilla = toTokens(raw);
+      const vanilla = interpret(parse(raw));
       const smart = snapshotInjectors(vanilla);
 
       const del = Math.random() * options.slowFactor;

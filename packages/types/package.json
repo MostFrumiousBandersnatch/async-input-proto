@@ -8,7 +8,8 @@
   "license": "ISC",
   "private": true,
   "scripts": {
-    "build": "tsc"
+    "build": "tsc -p ./tsconfig.json",
+    "prebuild": "rimraf dist/*"
   },
   "devDependencies": {
     "rxjs": "7.8.1"
