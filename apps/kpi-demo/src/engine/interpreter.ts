@@ -1,15 +1,12 @@
 import type {
   InterpretedSnapshot,
   StreamMultiProcessor,
-  TemplateToken,
 } from '@async-input/types';
 
 import {
-  makeInjectorOutOfSnapshotPattern,
-  parse,
-  interpret,
-  withInjectors,
-  colorizeToken,
+  defaultInterpret,
+  colorizeSnapshot,
+  makeMulitpleResponseGenerator,
 } from '@async-input/parsing_lib';
 
 import { of } from 'rxjs';
@@ -19,70 +16,65 @@ export interface KPIData {
   description?: string;
 }
 
-const DESCR_SNAP_PATTERNS: TemplateToken[] = [
-  {
-    id: 'trigger',
-    role: 'key',
-    variants: ['roas', 'roi', 'cpm', 'cpc'],
-    optional: false,
-  },
-];
+const getData = (name: string) => (snap: InterpretedSnapshot) => ({
+  title: `${name} of ${snap.interpreted[0].content}`,
+});
 
-const FRML_SNAP_PATTERNS: TemplateToken[] = [
-  {
-    id: 'trigger',
-    role: 'key',
-    variants: ['roas', 'roi', 'cpm', 'cpc'],
-    optional: false,
-  },
-  {
-    id: 'ds-stub',
-    role: 'data source',
-    variants: ['google', 'big-query'],
-    optional: true,
-  },
-];
+const generator = makeMulitpleResponseGenerator(
+  [
+    {
+      name: 'description',
+      pattern: [
+        {
+          id: 'trigger',
+          role: 'key',
+          variants: ['roas', 'roi', 'cpm', 'cpc'],
+          optional: false,
+        },
+      ],
+      getData: getData('description'),
+    },
+    {
+      name: 'chart',
+      pattern: [
+        {
+          id: 'trigger',
+          role: 'key',
+          variants: ['roas', 'roi', 'cpm', 'cpc'],
+          optional: false,
+        },
+      ],
+      getData: getData('chart'),
+    },
 
-const descSnapshotInjectors = withInjectors<InterpretedSnapshot>([
-  makeInjectorOutOfSnapshotPattern(DESCR_SNAP_PATTERNS),
-]);
-
-const frmlSnapshotInjectors = withInjectors<InterpretedSnapshot>([
-  makeInjectorOutOfSnapshotPattern(FRML_SNAP_PATTERNS),
-]);
-
-const colorize = colorizeToken(() => 'lightgrey');
+    {
+      name: 'formula',
+      pattern: [
+        {
+          id: 'trigger',
+          role: 'key',
+          variants: ['roas', 'roi', 'cpm', 'cpc'],
+          optional: false,
+        },
+        {
+          id: 'ds-stub',
+          role: 'data source',
+          variants: ['google', 'big-query'],
+          optional: true,
+        },
+      ],
+      getData: getData('formula'),
+    },
+  ],
+  colorizeSnapshot(() => 'lightgrey')
+);
 
 export const KPIInterpreter: StreamMultiProcessor<KPIData> = raw => {
-  const snap = interpret(parse(raw));
-  const leadingToken = snap.interpreted[0];
+  const snap = defaultInterpret(raw);
 
-  const alternatives = [];
-
-  const withDescr = descSnapshotInjectors(snap);
-  if (withDescr !== snap) {
-    alternatives.push({
-      name: 'description',
-      tokens: withDescr.interpreted.map(colorize),
-      data: { title: `description of ${leadingToken.content}` },
-    });
-  }
-
-  const withFormula = frmlSnapshotInjectors(snap);
-
-  if (withFormula !== snap) {
-    alternatives.push({
-      name: 'formula',
-      tokens: withFormula.interpreted.map(colorize),
-      data: { title: `formula of ${leadingToken.content}` },
-    });
-  }
-
-  if (alternatives.length > 0) {
-    return of({
-      raw: snap.raw,
-      alternatives,
-    });
+  const resp = generator(snap);
+  if (resp.alternatives.length > 0) {
+    return of(resp);
   } else {
     return of({
       raw: snap.raw,

@@ -1,4 +1,5 @@
 import {
+  InterpretedSnapshot,
   Interpreter,
   ParsedSnapshot,
   ParsedToken,
@@ -41,3 +42,6 @@ export const interpret: Interpreter = (snap: ParsedSnapshot) => ({
     ghost: false,
   })),
 });
+
+export const defaultInterpret = (raw: string): InterpretedSnapshot =>
+  interpret(parse(raw));

@@ -1,6 +1,8 @@
 import {
+  Interpretation,
   InterpretedSnapshot,
   InterpretedToken,
+  MultipleResponse,
   ParsedToken,
   TemplateToken,
 } from '@async-input/types';
@@ -114,3 +116,41 @@ export const makeInjectorOutOfSnapshotPattern =
       };
     } else return snap;
   };
+
+export interface AltGenerator<D> {
+  name: string;
+  pattern: TemplateToken[];
+  getData: (snap: InterpretedSnapshot) => D;
+}
+
+export const makeMulitpleResponseGenerator = <D>(
+  origins: AltGenerator<D>[],
+  postProcessor?: Injector<InterpretedSnapshot>
+): ((snap: InterpretedSnapshot) => MultipleResponse<D>) => {
+  const wrappedOrigins = origins.map(origin => ({
+    ...origin,
+    injector: makeInjectorOutOfSnapshotPattern(origin.pattern),
+  }));
+
+  return snap => {
+    const alternatives = wrappedOrigins.reduce<Interpretation<D>[]>(
+      (acc, origin) => {
+        const altSnap = origin.injector(snap);
+
+        if (altSnap !== snap) {
+          acc.push({
+            name: origin.name,
+            tokens: (postProcessor ? postProcessor(altSnap) : altSnap)
+              .interpreted,
+            data: origin.getData(snap),
+          });
+        }
+
+        return acc;
+      },
+      []
+    );
+
+    return { raw: snap.raw, alternatives };
+  };
+};
