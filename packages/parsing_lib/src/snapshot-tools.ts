@@ -1,7 +1,6 @@
 import {
   InterpretedSnapshot,
   InterpretedToken,
-  ParsedSnapshot,
   ParsedToken,
   TemplateToken,
 } from '@async-input/types';
@@ -21,15 +20,18 @@ export const withTokenInjector =
     interpreted: snap.interpreted.map(tokenInjector),
   });
 
-export const colorizeSnapshot =
-  (colorize: (_: InterpretedToken) => string): Injector<InterpretedSnapshot> =>
-  withTokenInjector(token => ({
+export const colorizeToken =
+  (colorize: (_: InterpretedToken) => string): Injector<InterpretedToken> =>
+  token => ({
     color: colorize(token),
     ...token,
-  }));
+  });
 
-export const embelisher =
-  (char: string): Injector<InterpretedSnapshot> =>
+export const colorizeSnapshot = (
+  colorize: (_: InterpretedToken) => string
+): Injector<InterpretedSnapshot> => withTokenInjector(colorizeToken(colorize));
+
+export const embelisher = (char: string): Injector<InterpretedSnapshot> =>
   withTokenInjector(token => ({
     ...token,
     ...(token.role
@@ -41,8 +43,10 @@ export const embelisher =
         }),
   }));
 
-
-const makeGhostToken = (specimen: TemplateToken, position: number): InterpretedToken => {
+const makeGhostToken = (
+  specimen: TemplateToken,
+  position: number
+): InterpretedToken => {
   const stubLength = specimen.role.length + 2;
 
   return {
@@ -51,16 +55,18 @@ const makeGhostToken = (specimen: TemplateToken, position: number): InterpretedT
     spaceBefore: 1,
     start: position,
     end: position + stubLength,
-    ghost: true
-  }
-}
+    ghost: true,
+  };
+};
 
-
-const makeMaterializedToken = (specimen: TemplateToken, token: ParsedToken): InterpretedToken => ({
+const makeMaterializedToken = (
+  specimen: TemplateToken,
+  token: ParsedToken
+): InterpretedToken => ({
   ...specimen,
   ...token,
-  ghost: false
-})
+  ghost: false,
+});
 
 export const zipTokens = (
   source: ParsedToken[],
@@ -79,6 +85,7 @@ export const checkTokens = (
   source: ParsedToken[],
   pattern: TemplateToken[]
 ): boolean =>
+  pattern.length >= source.length &&
   pattern
     .map((specimen, n) => {
       const token = source[n];

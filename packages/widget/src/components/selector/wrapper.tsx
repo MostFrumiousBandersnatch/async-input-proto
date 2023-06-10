@@ -1,44 +1,46 @@
-
 import React, { useContext, useEffect, useState } from 'react';
 import { OrchestratorContextAware } from '@widget/components/orchestrator/ctx';
+import { Interpretation } from '@widget/../../types/dist';
 
 export interface AlternativesSelectorProps<T> {
-  alternatives: T[];
-  selected?: number;
-  onChange: (_: number) => void;
+  options: T[];
+  selected?: T;
+  onChange: (_: T) => void;
 }
 
-interface SelectorWrapperProps<T, D> extends OrchestratorContextAware<D> {
-  selectorComp: React.FC<AlternativesSelectorProps<T>>;
+interface SelectorWrapperProps<D> extends OrchestratorContextAware<D> {
+  selectorComp: React.FC<AlternativesSelectorProps<Interpretation<D>['name']>>;
 }
 
 export function SelectorWrapper<D>({
   selectorComp,
   contextInstance,
-}: SelectorWrapperProps<string, D>) {
+}: SelectorWrapperProps<D>) {
   const ctx = useContext(contextInstance);
-  const [alternatives, setAlternatives] = useState([]);
-  const [selected, setSelected] = useState(0);
+  const [options, setOptions] = useState([]);
+  const [selected, setSelected] = useState<Interpretation<D>['name']>();
 
   useEffect(() => {
     if (ctx) {
       ctx.intepreterStream.subscribe({
         next: response => {
-          setAlternatives(response.alternatives.map(({ name }) => name));
+          setOptions(response.alternatives.map(({ name }) => name));
         },
       });
     }
   }, [ctx]);
 
   useEffect(() => {
-    setSelected(0);
-  }, [alternatives]);
+    if (!options.includes(selected)) {
+      setSelected(options[0]);
+    }
+  }, [options, selected]);
 
   useEffect(() => {
-    if (ctx) {
-      ctx.alternativesStream.next(alternatives[selected]);
+    if (ctx && selected) {
+      ctx.alternativesStream.next(selected);
     }
-  }, [alternatives, selected, ctx]);
+  }, [selected, ctx]);
 
-  return selectorComp({ alternatives, onChange: setSelected, selected });
+  return selectorComp({ options, onChange: setSelected, selected });
 }

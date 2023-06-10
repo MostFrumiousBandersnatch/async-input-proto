@@ -1,4 +1,3 @@
-
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import { Input } from '@widget/components/input/input';
@@ -16,8 +15,8 @@ export function InputWrapper<D>({ contextInstance }: InputWrapperProps<D>) {
     if (ctx) {
       ctx.feedbackStream.subscribe({
         next: alternative => {
-          setLoading(false);
           setSnapshot(alternative.snapshot);
+          setLoading(false);
         },
       });
     }
@@ -26,8 +25,8 @@ export function InputWrapper<D>({ contextInstance }: InputWrapperProps<D>) {
   const onChange = useCallback(
     (raw: string) => {
       if (ctx) {
-        ctx.inputStream.next(raw);
         setLoading(true);
+        ctx.inputStream.next(raw);
       }
     },
     [ctx]

@@ -8,11 +8,12 @@
   "private": true,
   "scripts": {
     "track-widget": "lerna run build-watch --scope=@async-input/widget",
+    "track-pl": "lerna run build-watch --scope=@async-input/parsing_lib",
     "start-demo": "lerna run start-dev --scope=@async-input/demo",
     "build-demo": "lerna run build --scope=@async-input/demo",
     "build-widget": "lerna run build --scope=@async-input/widget",
     "test-widget": "lerna run test --scope=@async-input/widget",
-    "run-all": "concurrently -rg --timings 'yarn track-widget' 'sleep 7 && yarn start-demo'"
+    "run-demo": "concurrently -rg --timings 'yarn track-widget' 'sleep 7 && yarn start-demo'"
   },
   "devDependencies": {
     "@swc/core": "^1.3.56",

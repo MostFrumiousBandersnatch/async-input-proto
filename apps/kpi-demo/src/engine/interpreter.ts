@@ -1,16 +1,17 @@
 import type {
   InterpretedSnapshot,
-  ParsedSnapshot,
   StreamMultiProcessor,
   TemplateToken,
 } from '@async-input/types';
+
 import {
-  checkTokens,
   makeInjectorOutOfSnapshotPattern,
   parse,
   interpret,
   withInjectors,
+  colorizeToken,
 } from '@async-input/parsing_lib';
+
 import { of } from 'rxjs';
 
 export interface KPIData {
@@ -23,7 +24,7 @@ const DESCR_SNAP_PATTERNS: TemplateToken[] = [
     id: 'trigger',
     role: 'key',
     variants: ['roas', 'roi', 'cpm', 'cpc'],
-    optional: false
+    optional: false,
   },
 ];
 
@@ -38,23 +39,23 @@ const FRML_SNAP_PATTERNS: TemplateToken[] = [
     id: 'ds-stub',
     role: 'data source',
     variants: ['google', 'big-query'],
-    optional: true
-  }
+    optional: true,
+  },
 ];
 
+const descSnapshotInjectors = withInjectors<InterpretedSnapshot>([
+  makeInjectorOutOfSnapshotPattern(DESCR_SNAP_PATTERNS),
+]);
 
-const descSnapshotInjectors = withInjectors<InterpretedSnapshot>(
-  [makeInjectorOutOfSnapshotPattern(DESCR_SNAP_PATTERNS)]
-);
+const frmlSnapshotInjectors = withInjectors<InterpretedSnapshot>([
+  makeInjectorOutOfSnapshotPattern(FRML_SNAP_PATTERNS),
+]);
 
-const frmlSnapshotInjectors = withInjectors<InterpretedSnapshot>(
-  [makeInjectorOutOfSnapshotPattern(FRML_SNAP_PATTERNS)]
-);
+const colorize = colorizeToken(() => 'lightgrey');
 
 export const KPIInterpreter: StreamMultiProcessor<KPIData> = raw => {
   const snap = interpret(parse(raw));
   const leadingToken = snap.interpreted[0];
-
 
   const alternatives = [];
 
@@ -62,7 +63,7 @@ export const KPIInterpreter: StreamMultiProcessor<KPIData> = raw => {
   if (withDescr !== snap) {
     alternatives.push({
       name: 'description',
-      tokens: withDescr.interpreted,
+      tokens: withDescr.interpreted.map(colorize),
       data: { title: `description of ${leadingToken.content}` },
     });
   }
@@ -70,9 +71,9 @@ export const KPIInterpreter: StreamMultiProcessor<KPIData> = raw => {
   const withFormula = frmlSnapshotInjectors(snap);
 
   if (withFormula !== snap) {
-    alternatives.push( {
+    alternatives.push({
       name: 'formula',
-      tokens: withFormula.interpreted,
+      tokens: withFormula.interpreted.map(colorize),
       data: { title: `formula of ${leadingToken.content}` },
     });
   }
@@ -80,7 +81,7 @@ export const KPIInterpreter: StreamMultiProcessor<KPIData> = raw => {
   if (alternatives.length > 0) {
     return of({
       raw: snap.raw,
-      alternatives
+      alternatives,
     });
   } else {
     return of({

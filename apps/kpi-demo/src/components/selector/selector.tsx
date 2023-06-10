@@ -6,22 +6,22 @@ import { AlternativesSelectorProps } from '@async-input/widget';
 import './selector.scss';
 
 export const Selector: React.FC<AlternativesSelectorProps<string>> = ({
-  alternatives,
+  options,
   onChange,
-  selected = 0,
+  selected,
 }) => {
   return (
-    <ul className={classNames('selector', {empty: alternatives.length <= 1})}>
-      {alternatives.length > 1 &&
-        alternatives.map((value, n) => (
+    <ul className={classNames('selector', { empty: options.length <= 1 })}>
+      {options.length > 1 &&
+        options.map(value => (
           <li
-            key="value"
+            key={value}
             className={classNames({
               alternative: true,
-              selected: n === selected,
+              selected: value === selected,
             })}
             onClick={() => {
-              onChange(n);
+              onChange(value);
             }}
           >
             {value}
