@@ -1,11 +1,15 @@
-import {
+import type {
   Interpretation,
   InterpretedSnapshot,
   InterpretedToken,
   MultipleResponse,
+  NestedTemplateToken,
   ParsedToken,
   TemplateToken,
 } from '@async-input/types';
+
+import { DEFAULT_BRANCH } from '@async-input/types';
+
 import { repeat } from 'utils/misc';
 
 type Injector<T> = (input: T) => T;
@@ -45,18 +49,24 @@ export const embelisher = (char: string): Injector<InterpretedSnapshot> =>
         }),
   }));
 
+const getStubLength = (specimen: TemplateToken) =>
+  Math.ceil(specimen.role.length * 1.2);
+
+const getStubContent = (specimen: TemplateToken) =>
+  repeat(' ', getStubLength(specimen)).join('');
+
 const makeGhostToken = (
   specimen: TemplateToken,
   position: number
 ): InterpretedToken => {
-  const stubLength = specimen.role.length + 2;
+  const content = getStubContent(specimen);
 
   return {
     ...specimen,
-    content: repeat(' ', stubLength).join(''),
+    content,
     spaceBefore: 1,
     start: position,
-    end: position + stubLength,
+    end: position + content.length,
     ghost: true,
   };
 };
@@ -64,11 +74,13 @@ const makeGhostToken = (
 const makeMaterializedToken = (
   specimen: TemplateToken,
   token: ParsedToken
-): InterpretedToken => ({
-  ...specimen,
-  ...token,
-  ghost: false,
-});
+): InterpretedToken => {
+  return {
+    ...specimen,
+    ...token,
+    ghost: false,
+  };
+};
 
 export const zipTokens = (
   source: ParsedToken[],
@@ -83,28 +95,49 @@ export const zipTokens = (
     return acc;
   }, []);
 
-export const checkTokens = (
+const checkToken = (
+  token: ParsedToken,
+  specimen: TemplateToken,
+  isTailingToken: boolean
+): boolean => {
+  if (specimen.optional) {
+    switch (true) {
+      case !token:
+        return true;
+      case isTailingToken:
+        return specimen.variants.some(v => v.startsWith(token.content));
+      default:
+        return specimen.variants.some(v => v === token.content);
+    }
+  } else {
+    return specimen.variants.includes(token?.content);
+  }
+};
+
+const checkTokens = (
   source: ParsedToken[],
   pattern: TemplateToken[]
 ): boolean =>
   pattern.length >= source.length &&
   pattern
-    .map((specimen, n) => {
-      const token = source[n];
-      if (specimen.optional) {
-        switch (true) {
-          case !token:
-            return true;
-          case n === source.length - 1:
-            return specimen.variants.some(v => v.startsWith(token.content));
-          default:
-            return specimen.variants.some(v => v === token.content);
-        }
-      } else {
-        return specimen.variants.includes(token?.content);
-      }
-    })
+    .map((specimen, n) =>
+      checkToken(source[n], specimen, n === source.length - 1)
+    )
     .every(Boolean);
+
+const shiftPattern = (
+  pattern: NestedTemplateToken,
+  clue?: ParsedToken
+): NestedTemplateToken | null => {
+  switch (true) {
+    case DEFAULT_BRANCH in pattern.branches:
+      return pattern.branches[DEFAULT_BRANCH];
+    case clue?.content in pattern.branches:
+      return pattern.branches[clue.content];
+    default:
+      return null;
+  }
+};
 
 export const makeInjectorOutOfSnapshotPattern =
   (pattern: TemplateToken[]): Injector<InterpretedSnapshot> =>
@@ -117,9 +150,40 @@ export const makeInjectorOutOfSnapshotPattern =
     } else return snap;
   };
 
+export const makeInjectorOutOfNestedTemplate =
+  (pattern: NestedTemplateToken): Injector<InterpretedSnapshot> =>
+  snap => {
+    const interpreted: InterpretedToken[] = [];
+
+    const lastParsedNum = snap.interpreted.length - 1;
+    let currParsedNum = 0;
+    let specimen = pattern;
+
+    while (specimen) {
+      const token = snap.interpreted[currParsedNum];
+      if (!checkToken(token, specimen, currParsedNum === lastParsedNum)) {
+        return snap;
+      } else {
+        const prevToken = interpreted.at(-1);
+        interpreted.push(
+          token
+            ? makeMaterializedToken(specimen, token)
+            : makeGhostToken(specimen, (prevToken?.end || 0) + 1) //TODO: adjust to multiple spaces
+        );
+        specimen = shiftPattern(specimen, token);
+        currParsedNum += 1;
+      }
+    }
+
+    return {
+      raw: snap.raw,
+      interpreted,
+    };
+  };
+
 export interface AltGenerator<D> {
   name: string;
-  pattern: TemplateToken[];
+  pattern: TemplateToken[] | NestedTemplateToken;
   getData: (snap: InterpretedSnapshot) => D;
 }
 
@@ -129,7 +193,9 @@ export const makeMulitpleResponseGenerator = <D>(
 ): ((snap: InterpretedSnapshot) => MultipleResponse<D>) => {
   const wrappedOrigins = origins.map(origin => ({
     ...origin,
-    injector: makeInjectorOutOfSnapshotPattern(origin.pattern),
+    injector: Array.isArray(origin.pattern)
+      ? makeInjectorOutOfSnapshotPattern(origin.pattern)
+      : makeInjectorOutOfNestedTemplate(origin.pattern),
   }));
 
   return snap => {

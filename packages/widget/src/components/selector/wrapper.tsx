@@ -31,13 +31,14 @@ export function SelectorWrapper<D>({
   }, [ctx]);
 
   useEffect(() => {
+
     if (!options.includes(selected)) {
       setSelected(options[0]);
     }
   }, [options, selected]);
 
   useEffect(() => {
-    if (ctx && selected) {
+    if (ctx) {
       ctx.alternativesStream.next(selected);
     }
   }, [selected, ctx]);

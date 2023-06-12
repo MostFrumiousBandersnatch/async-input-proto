@@ -29,6 +29,12 @@ export interface TemplateToken
       optional: boolean;
     }
 
+export interface NestedTemplateToken extends TemplateToken {
+  branches: Record<string, NestedTemplateToken>
+}
+
+export const DEFAULT_BRANCH = '__default';
+
 export interface InterpretedToken
   extends ParsedToken,
     Identified,

@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Essential typings",
   "types": "dist/index.d.ts",
-  "main": "dist/index.d.ts",
+  "main": "dist/index.js",
   "author": "Ivan Kondratyev <ivanbright@gmail.com>",
   "license": "ISC",
   "private": true,
@@ -19,7 +19,8 @@
     ".": {
       "types": {
         "default": "./dist/index.d.ts"
-      }
+      },
+      "default": "./dist/index.js"
     }
   }
 }

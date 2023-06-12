@@ -122,13 +122,7 @@ export const Input: React.FC<InputProps> = React.memo(function Input({
         }
       }
     },
-    [
-      currVariants,
-      setCurrVariant,
-      inputRef,
-      currVariant,
-      append
-    ]
+    [currVariants, setCurrVariant, inputRef, currVariant, append]
   );
 
   const { debug, hint, placeholder } = useContext(InputContext);
@@ -139,12 +133,13 @@ export const Input: React.FC<InputProps> = React.memo(function Input({
       {...(debug ? { 'data-testid': 'asyncInputRoot' } : {})}
     >
       <div className="layer tags">
-        {tokens.map(token => (
+        {tokens.map((token, n) => (
           <Token
             {...token}
             variants={currVariants}
             key={token.id}
             highlighted={token.id === currToken?.id}
+            trailing={n === tokens.length - 1}
             currVariant={currVariant}
             applyVariant={append}
           />

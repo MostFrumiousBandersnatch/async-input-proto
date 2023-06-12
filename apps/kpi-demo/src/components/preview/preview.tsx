@@ -11,9 +11,9 @@ export const Preview = () => {
   useEffect(() => {
     if (ctx) {
       ctx.feedbackStream.subscribe({
-        next: ({ data: currData, snapshot }) => {
-          setData(currData);
-          setIsEmpty(snapshot.raw.length === 0);
+        next: item => {
+          setData(item?.data);
+          setIsEmpty(item?.snapshot.raw.length === 0);
         },
       });
     }

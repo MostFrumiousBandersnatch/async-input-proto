@@ -15,7 +15,7 @@ export function InputWrapper<D>({ contextInstance }: InputWrapperProps<D>) {
     if (ctx) {
       ctx.feedbackStream.subscribe({
         next: alternative => {
-          setSnapshot(alternative.snapshot);
+          setSnapshot(alternative?.snapshot);
           setLoading(false);
         },
       });

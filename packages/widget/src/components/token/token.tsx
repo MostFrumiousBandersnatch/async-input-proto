@@ -12,6 +12,7 @@ const genClipPath = (role = ''): string => {
 
 export interface TokenProps extends InterpretedToken {
   highlighted: boolean;
+  trailing: boolean;
   currVariant: number;
   applyVariant: (_: string) => void;
 }
@@ -22,6 +23,8 @@ export const Token = ({
   role,
   spaceBefore,
   highlighted,
+  trailing,
+  ghost,
   variants = [],
   currVariant,
   applyVariant,
@@ -46,6 +49,8 @@ export const Token = ({
             background: color,
             color: debug ? 'inherit' : 'transparent',
             clipPath: genClipPath(role),
+            //to show role correctly
+            ...(!ghost && trailing && role ? { minWidth: `${role.length * 7 + 5}px` } : {}),
           }}
         >
           {content}

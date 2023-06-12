@@ -3,6 +3,8 @@ import type {
   StreamMultiProcessor,
 } from '@async-input/types';
 
+import { DEFAULT_BRANCH } from '@async-input/types';
+
 import {
   defaultInterpret,
   colorizeSnapshot,
@@ -22,6 +24,34 @@ const getData = (name: string) => (snap: InterpretedSnapshot) => ({
 
 const generator = makeMulitpleResponseGenerator(
   [
+    {
+      name: 'formula',
+      pattern: {
+        id: 'trigger',
+        role: 'key',
+        variants: ['roas', 'roi', 'cpm', 'cpc'],
+        optional: false,
+        branches: {
+          [DEFAULT_BRANCH]: {
+            id: 'ds-stub',
+            role: 'data source',
+            variants: ['google', 'big-query'],
+            optional: true,
+            branches: {
+              google: {
+                id: 'trg-stub',
+                role: 'target',
+                variants: ['sheets', 'looker'],
+                optional: true,
+                branches: {},
+              },
+            },
+          },
+        },
+      },
+
+      getData: getData('formula'),
+    },
     {
       name: 'description',
       pattern: [
@@ -45,25 +75,6 @@ const generator = makeMulitpleResponseGenerator(
         },
       ],
       getData: getData('chart'),
-    },
-
-    {
-      name: 'formula',
-      pattern: [
-        {
-          id: 'trigger',
-          role: 'key',
-          variants: ['roas', 'roi', 'cpm', 'cpc'],
-          optional: false,
-        },
-        {
-          id: 'ds-stub',
-          role: 'data source',
-          variants: ['google', 'big-query'],
-          optional: true,
-        },
-      ],
-      getData: getData('formula'),
     },
   ],
   colorizeSnapshot(() => 'lightgrey')

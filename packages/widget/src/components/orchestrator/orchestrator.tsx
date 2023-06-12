@@ -1,15 +1,20 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   combineLatestWith,
+  distinctUntilChanged,
+  EMPTY,
   filter,
   map,
-  mergeMap,
   Observable,
   Observer,
   Subject,
+  switchMap,
 } from 'rxjs';
 
-import type { MultipleResponse, StreamMultiProcessor } from '@async-input/types';
+import type {
+  MultipleResponse,
+  StreamMultiProcessor,
+} from '@async-input/types';
 import {
   OrchestratorContextAware,
   OrchestratorContextType,
@@ -26,21 +31,35 @@ export function Orchestrator<D>({
   children,
   contextInstance,
 }: OrchestratorProps<D>) {
-  const [inputStream, setInputStream] = useState<Observer<string>>(null);
+  const [inputStream, setInputStream] = useState<Subject<string>>(null);
   const [alternativesStream, setAlternativesStream] =
     useState<Observer<string>>(null);
 
   const intepreterStream = useMemo<Observable<MultipleResponse<D>>>(() => {
-    const stream = new Subject();
+    if (inputStream && interpreter) {
+      return (
+        inputStream
+          .pipe(
+            distinctUntilChanged(),
+            switchMap(interpreter)
+          )
+      );
+    } else {
+      return EMPTY;
+    }
+  }, [inputStream, interpreter]);
+
+  useEffect(() => {
+    const stream = new Subject<string>();
     setInputStream(stream);
-    return stream.pipe(mergeMap(interpreter));
-  }, [interpreter]);
+  }, [setInputStream]);
 
   const feedbackStream = useMemo(() => {
     const stream = new Subject<string>();
     setAlternativesStream(stream);
 
-    return intepreterStream.pipe(combineLatestWith(stream)).pipe(
+    return intepreterStream.pipe(
+      combineLatestWith(stream.pipe(distinctUntilChanged())),
       map(([response, chosenAlternative]) => {
         const int = response.alternatives.find(
           ({ name }) => name === chosenAlternative
