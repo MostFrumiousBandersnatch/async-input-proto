@@ -13,6 +13,7 @@
     "build-demo": "lerna run build --scope=@async-input/demo",
     "build-widget": "lerna run build --scope=@async-input/widget",
     "test-widget": "lerna run test --scope=@async-input/widget",
+    "test-all": "lerna run test",
     "run-demo": "concurrently -rg --timings 'yarn track-widget' 'sleep 7 && yarn start-demo'"
   },
   "devDependencies": {

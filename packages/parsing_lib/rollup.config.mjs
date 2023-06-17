@@ -11,7 +11,7 @@ export default [
     output: [
       {
         dir: 'dist/',
-        format: 'es',
+        format: 'cjs',
         sourcemap: true,
         assetFileNames: '[name][extname]',
       },
