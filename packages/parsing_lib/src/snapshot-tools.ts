@@ -1,3 +1,5 @@
+import { Observable, of } from 'rxjs';
+
 import type {
   Interpretation,
   InterpretedSnapshot,
@@ -12,7 +14,7 @@ import { DEFAULT_BRANCH } from '@async-input/types';
 
 import { repeat } from 'utils/misc';
 
-type Injector<T> = (input: T) => T;
+export type Injector<T> = (input: T) => T;
 
 export const withInjectors =
   <T>(injectors: Array<Injector<T>>) =>
@@ -190,7 +192,7 @@ export interface AltGenerator<D> {
 export const makeMulitpleResponseGenerator = <D>(
   origins: AltGenerator<D>[],
   postProcessor?: Injector<InterpretedSnapshot>
-): ((snap: InterpretedSnapshot) => MultipleResponse<D>) => {
+): ((snap: InterpretedSnapshot) => Observable <MultipleResponse<D>>) => {
   const wrappedOrigins = origins.map(origin => ({
     ...origin,
     injector: Array.isArray(origin.pattern)
@@ -217,6 +219,6 @@ export const makeMulitpleResponseGenerator = <D>(
       []
     );
 
-    return { raw: snap.raw, alternatives };
+    return of({ raw: snap.raw, alternatives });
   };
 };

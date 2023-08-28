@@ -8,10 +8,9 @@ import { DEFAULT_BRANCH } from '@async-input/types';
 import {
   defaultInterpret,
   colorizeSnapshot,
-  makeMulitpleResponseGenerator,
 } from '@async-input/parsing_lib';
 
-import { of } from 'rxjs';
+import {makeMulitpleResponseSequentialGenerator} from 'engine/generator';
 
 export interface KPIData {
   title: string;
@@ -22,7 +21,7 @@ const getData = (name: string) => (snap: InterpretedSnapshot) => ({
   title: `${name} of ${snap.interpreted[0].content}`,
 });
 
-const generator = makeMulitpleResponseGenerator(
+const generator = makeMulitpleResponseSequentialGenerator(
   [
     {
       name: 'formula',
@@ -83,19 +82,5 @@ const generator = makeMulitpleResponseGenerator(
 export const KPIInterpreter: StreamMultiProcessor<KPIData> = raw => {
   const snap = defaultInterpret(raw);
 
-  const resp = generator(snap);
-  if (resp.alternatives.length > 0) {
-    return of(resp);
-  } else {
-    return of({
-      raw: snap.raw,
-      alternatives: [
-        {
-          name: '???',
-          tokens: snap.interpreted,
-          data: null,
-        },
-      ],
-    });
-  }
+  return generator(snap);
 };

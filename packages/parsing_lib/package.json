@@ -22,5 +22,8 @@
   },
   "devDependencies": {
     "@async-input/types": "*"
+  },
+  "dependencies": {
+    "rxjs": "7.8.1"
   }
 }

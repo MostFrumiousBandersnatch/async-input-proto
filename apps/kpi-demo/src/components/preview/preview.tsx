@@ -1,6 +1,7 @@
 import { kpiOrchContext } from 'engine/ctx';
 import { KPIData } from 'engine/interpreter';
 import React, { useContext, useEffect, useState } from 'react';
+import { filter } from 'rxjs';
 
 export const Preview = () => {
   const ctx = useContext(kpiOrchContext);
@@ -10,7 +11,7 @@ export const Preview = () => {
 
   useEffect(() => {
     if (ctx) {
-      ctx.feedbackStream.subscribe({
+      ctx.feedbackStream.pipe(filter(Boolean)).subscribe({
         next: item => {
           setData(item?.data);
           setIsEmpty(item?.snapshot.raw.length === 0);
