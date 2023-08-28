@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { OrchestratorContextAware } from '@widget/components/orchestrator/ctx';
 import { Interpretation } from '@widget/../../types/dist';
+import { filter } from 'rxjs';
 
 export interface AlternativesSelectorProps<T> {
   options: T[];
@@ -22,7 +23,9 @@ export function SelectorWrapper<D>({
 
   useEffect(() => {
     if (ctx) {
-      ctx.intepreterStream.subscribe({
+      ctx.intepreterStream.pipe(
+        filter(Boolean)
+      ).subscribe({
         next: response => {
           setOptions(response.alternatives.map(({ name }) => name));
         },
@@ -31,7 +34,6 @@ export function SelectorWrapper<D>({
   }, [ctx]);
 
   useEffect(() => {
-
     if (!options.includes(selected)) {
       setSelected(options[0]);
     }

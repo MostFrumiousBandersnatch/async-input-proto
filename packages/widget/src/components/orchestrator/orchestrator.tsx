@@ -1,12 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   combineLatestWith,
+  concat,
   distinctUntilChanged,
   EMPTY,
   filter,
   map,
   Observable,
   Observer,
+  of,
   Subject,
   switchMap,
 } from 'rxjs';
@@ -35,14 +37,13 @@ export function Orchestrator<D>({
   const [alternativesStream, setAlternativesStream] =
     useState<Observer<string>>(null);
 
-  const intepreterStream = useMemo<Observable<MultipleResponse<D>>>(() => {
+  const intepreterStream = useMemo<
+    Observable<MultipleResponse<D> | null>
+  >(() => {
     if (inputStream && interpreter) {
-      return (
-        inputStream
-          .pipe(
-            distinctUntilChanged(),
-            switchMap(interpreter)
-          )
+      return inputStream.pipe(
+        distinctUntilChanged(),
+        switchMap(raw => concat(interpreter(raw), of(null)))
       );
     } else {
       return EMPTY;
@@ -59,14 +60,18 @@ export function Orchestrator<D>({
     setAlternativesStream(stream);
 
     return intepreterStream.pipe(
+      filter(Boolean),
       combineLatestWith(stream.pipe(distinctUntilChanged())),
       map(([response, chosenAlternative]) => {
-        const int = response.alternatives.find(
+        const interpretation = response?.alternatives.find(
           ({ name }) => name === chosenAlternative
         );
 
-        return int ? processIterpretation(response.raw, int) : undefined;
+        return interpretation
+          ? processIterpretation(response.raw, interpretation)
+          : undefined;
       }),
+
       filter(Boolean)
     );
   }, [intepreterStream]);

@@ -26,7 +26,7 @@ export const processIterpretation = <D>(
 
 export interface OrchestratorContextType<D> {
   inputStream: Observer<string>;
-  intepreterStream: Observable<MultipleResponse<D>>;
+  intepreterStream: Observable<MultipleResponse<D> | null>;
   alternativesStream: Observer<string>;
   feedbackStream: Observable<ProcessedInterptretation<D>>;
 }

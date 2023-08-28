@@ -16,8 +16,15 @@ export function InputWrapper<D>({ contextInstance }: InputWrapperProps<D>) {
       ctx.feedbackStream.subscribe({
         next: alternative => {
           setSnapshot(alternative?.snapshot);
+        },
+        complete: () => {
           setLoading(false);
         },
+      });
+      ctx.intepreterStream.subscribe(resp => {
+        if (resp === null) {
+          setLoading(false);
+        }
       });
     }
   }, [ctx]);
