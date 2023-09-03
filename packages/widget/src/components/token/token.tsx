@@ -1,12 +1,14 @@
 import { InputContext } from '@widget/components/input/ctx';
-import { InterpretedToken } from '@async-input/types';
+import { InterpretationResult, InterpretedToken } from '@async-input/types';
 import { repeat } from '@widget/utils/misc';
 import React, { useContext } from 'react';
 
 import './token.scss';
 
+const getRoleWidth = (role: string): number => 6 * role.length + 4;
+
 const genClipPath = (role = ''): string => {
-  const roleWidth = 6 * role.length + 4;
+  const roleWidth = getRoleWidth(role);
   return `polygon(0 12px, calc(100% - ${roleWidth}px) 12px, calc(100% - ${roleWidth}px) 0, 100% 0, 100% 100%, 0 100%)`;
 };
 
@@ -21,15 +23,16 @@ export const Token = ({
   content,
   color,
   role,
+  status,
   spaceBefore,
   highlighted,
-  trailing,
-  ghost,
   variants = [],
   currVariant,
   applyVariant,
 }: TokenProps) => {
   const { debug } = useContext(InputContext);
+
+  const ghost = status === InterpretationResult.suggested;
 
   return (
     <>
@@ -50,7 +53,7 @@ export const Token = ({
             color: debug ? 'inherit' : 'transparent',
             clipPath: genClipPath(role),
             //to show role correctly
-            ...(!ghost && trailing && role ? { minWidth: `${role.length * 7 + 5}px` } : {}),
+            ...(!ghost && role ? { minWidth: `${role.length * 7 + 5}px` } : {}),
           }}
         >
           {content}

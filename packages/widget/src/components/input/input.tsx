@@ -16,7 +16,7 @@ import type { InterpretedToken, InterpretedSnapshot } from '@async-input/types';
 
 import './input.scss';
 import { cyclicShift } from '@widget/utils/misc';
-import { getActualVariants, isEdgeToken } from '@widget/utils/tokens';
+import { isEdgeToken } from '@widget/utils/tokens';
 import { InputContext } from '@widget/components/input/ctx';
 
 export interface InputProps {
@@ -69,7 +69,7 @@ export const Input: React.FC<InputProps> = React.memo(function Input({
   }, [snapshot, selection]);
 
   const currVariants = useMemo(
-    () => currToken && getActualVariants(currToken),
+    () => currToken && currToken.variants,
     [currToken]
   );
   const [currVariant, setCurrVariant] = useState(0);

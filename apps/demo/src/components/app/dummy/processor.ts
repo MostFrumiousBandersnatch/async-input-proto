@@ -1,20 +1,24 @@
 import { Observable, Subscriber } from 'rxjs';
 
-import type {
+import {
   AsyncProcessor,
   StreamProcessor,
   InterpretedToken,
-  TemplateToken,
-  InterpretedSnapshot
+  InterpretedSnapshot,
+  NestedTemplateToken,
+  InterpretationResult,
 } from '@async-input/types';
+
+import { DEFAULT_BRANCH } from '@async-input/types';
 
 import {
   colorizeSnapshot,
   embelisher,
-  makeInjectorOutOfSnapshotPattern,
-  withInjectors,
+  makeInjectorOutOfNestedTemplates,
   withTokenInjector,
-  parse, interpret
+  parse,
+  interpret,
+  withInjectors,
 } from '@async-input/parsing_lib';
 
 import { delay } from '@root/utils/async';
@@ -27,82 +31,86 @@ const COLORS = ['#9edcd0', '#9ac9ed', '#6980e5', '#c79df2'];
 
 const colorInjector = colorizeSnapshot(
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
-  (token: InterpretedToken): string => COLORS[Math.floor(Math.random() * COLORS.length)]
+  (token: InterpretedToken): string =>
+    COLORS[Math.floor(Math.random() * COLORS.length)]
 );
 
-const tokenInjectors = withInjectors<InterpretedToken>([
-  token =>
-    token.content === 'ip'
-      ? {
-          ...token,
-          variants: ['ipa', 'ipsum'],
-          role: '$$$',
-        }
-      : token,
-  token =>
-    token.content === 'bee'
-      ? {
-          ...token,
-          color:
-            'repeating-linear-gradient(-45deg, gold 0 10px, grey 10px 20px)',
-          role: 'z-z-z',
-        }
-      : token,
-]);
-
-const SNAP_PATTERNS: TemplateToken[][] = [
-  [
-    {
-
-      id: 'trigger',
-      role: 'key',
-      color:
-        'linear-gradient(132deg, rgb(241, 242, 11) 0.00%, rgb(248, 161, 27) 100.00%)',
-      variants: ['beer'],
-      optional: false
+const SNAP_PATTERNS: NestedTemplateToken[] = [
+  {
+    id: 'buzz',
+    variants: ['bee', 'wasp'],
+    color: 'repeating-linear-gradient(-45deg, gold 0 10px, grey 10px 20px)',
+    role: 'z-z-z',
+  },
+  {
+    id: 'ip',
+    role: '$$$',
+    variants: ['ipa', 'ipsum'],
+  },
+  {
+    id: 'beer-trigger',
+    role: 'key',
+    color:
+      'linear-gradient(132deg, rgb(241, 242, 11) 0.00%, rgb(248, 161, 27) 100.00%)',
+    variants: ['beer'],
+    branches: {
+      [DEFAULT_BRANCH]: {
+        id: 'stub-action',
+        role: 'action',
+        color:
+          'linear-gradient(132deg, rgb(113, 143, 175) 0.00%, rgb(69, 92, 114) 100.00%)',
+        variants: ['grab', 'find'],
+        branches: {
+          [DEFAULT_BRANCH]: {
+            id: 'stub-kind',
+            role: 'kind',
+            color:
+              'linear-gradient(132deg, rgb(221, 2, 3) 0.00%, rgb(251, 137, 2) 20.00%, rgb(248, 235, 5) 40.00%, rgb(0, 127, 38) 60.00%, rgb(5, 75, 249) 80.00%, rgb(114, 6, 130) 100.00%)',
+            variants: ['lager', 'porter', 'ale', 'blanche'],
+          },
+        },
+      },
     },
-    {
-      id: 'stub-action',
-      role: 'action',
-      color:
-        'linear-gradient(132deg, rgb(113, 143, 175) 0.00%, rgb(69, 92, 114) 100.00%)',
-      variants: ['grab', 'find'],
-      optional: true,
-    },
-    {
-      id: 'stub-kind',
-      role: 'kind',
-      color:
-        'linear-gradient(132deg, rgb(221, 2, 3) 0.00%, rgb(251, 137, 2) 20.00%, rgb(248, 235, 5) 40.00%, rgb(0, 127, 38) 60.00%, rgb(5, 75, 249) 80.00%, rgb(114, 6, 130) 100.00%)',
-      variants: ['lager', 'porter', 'ale', 'blanche'],
-      optional: true,
-    },
-  ],
+  },
 ];
 
-const snapshotInjectors = withInjectors<InterpretedSnapshot>(
-  SNAP_PATTERNS.map(makeInjectorOutOfSnapshotPattern)
-);
+const snapshotInjectors = makeInjectorOutOfNestedTemplates(SNAP_PATTERNS);
 
 const withAsterisks = embelisher('*');
 const withSharps = embelisher('#');
+
+const markMismatched = withTokenInjector(token =>
+  token.status === InterpretationResult.misMatched
+    ? {
+        ...token,
+        color: 'lightcoral',
+      }
+    : token
+);
+
+const markNotRecognized = withTokenInjector(token =>
+  token.status === InterpretationResult.notRecognized
+    ? {
+        ...token,
+        color: 'lightgrey',
+        role: '???',
+      }
+    : token
+);
+
+const postProcessor = withInjectors([markMismatched, markNotRecognized]);
 
 export const dummyTokenProcessor =
   (options: FakeTokenProcessorOptions): AsyncProcessor =>
   async raw => {
     const vanilla = interpret(parse(raw));
-    const smart = snapshotInjectors(vanilla);
+    let smart = snapshotInjectors(vanilla);
+    smart = postProcessor(smart);
 
     const del = Math.random() * 1000;
     await delay(del * options.slowFactor);
 
-    if (smart === vanilla) {
-      return withTokenInjector(tokenInjectors)(
-        withSharps(colorInjector(vanilla))
-      );
-    } else {
-      return smart;
-    }
+    return smart;
   };
 
 interface StreamState {
@@ -137,9 +145,7 @@ export const dummyTokenStreamProcessor =
         pushToStream(
           subscriber,
           state,
-          withTokenInjector(tokenInjectors)(
-            (twoSteps ? withAsterisks : withSharps)(colorInjector(vanilla))
-          )
+          (twoSteps ? withAsterisks : withSharps)(colorInjector(vanilla))
         );
 
         if (twoSteps) {

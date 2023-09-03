@@ -12,37 +12,48 @@ interface Colored {
 interface RoleAware {
   role: string;
 }
+interface Scored {
+  score: number;
+}
 
 interface WithSuggestions {
   variants: string[];
 }
-export interface ParsedToken extends BareToken {
+export interface ParsedToken extends BareToken, Identified {
   start: number;
   end: number;
   spaceBefore: number;
 }
 
 export interface TemplateToken
-  extends Identified, WithSuggestions,
+  extends Identified,
+    WithSuggestions,
     RoleAware,
-    Partial<Colored> {
-      optional: boolean;
-    }
+    Partial<Colored> {}
 
 export interface NestedTemplateToken extends TemplateToken {
-  branches: Record<string, NestedTemplateToken>
+  branches?: Record<string, NestedTemplateToken>;
 }
 
 export const DEFAULT_BRANCH = '__default';
 
+export enum InterpretationResult {
+  notRecognized = 'notRecognized',
+  matched = 'matched',
+  misMatched = 'misMatched',
+  partiallyMatched = 'partiallyMatched',
+  suggested = 'suggested',
+}
+
 export interface InterpretedToken
   extends ParsedToken,
-    Identified,
     Partial<WithSuggestions>,
     Partial<RoleAware>,
-    Partial<Colored> {
-      ghost: boolean;
-    }
+    Partial<Colored>,
+    Partial<Scored> {
+  status: InterpretationResult;
+  matchRate?: number;
+}
 export interface ParsedSnapshot {
   raw: string;
   parsed: ParsedToken[];
@@ -56,13 +67,9 @@ export type Tokenizer = (raw: string) => ParsedSnapshot;
 
 export type Interpreter = (snap: ParsedSnapshot) => InterpretedSnapshot;
 
-export type AsyncProcessor = (
-  raw: string
-) => Promise<InterpretedSnapshot>;
+export type AsyncProcessor = (raw: string) => Promise<InterpretedSnapshot>;
 
-export type StreamProcessor = (
-  raw: string
-) => Observable<InterpretedSnapshot>;
+export type StreamProcessor = (raw: string) => Observable<InterpretedSnapshot>;
 export interface Interpretation<D> {
   name: string;
   tokens: InterpretedToken[];

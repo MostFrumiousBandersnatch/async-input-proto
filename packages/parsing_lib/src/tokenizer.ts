@@ -1,4 +1,5 @@
 import {
+  InterpretationResult,
   InterpretedSnapshot,
   Interpreter,
   ParsedSnapshot,
@@ -9,8 +10,8 @@ import {
 export const breakString = (raw: string): string[] =>
   raw.split(/\s+/).filter(token => token.length > 0);
 
-export const genTokenId = (token: ParsedToken): string =>
-  `${token.content}_${token.start}`;
+export const genTokenId = (content: string, start: number): string =>
+  `${content}_${start}`;
 
 export const parse: Tokenizer = raw => {
   const tokens = breakString(raw).reduce<ParsedToken[]>((parsed, rawPart) => {
@@ -22,6 +23,7 @@ export const parse: Tokenizer = raw => {
       start: start,
       end: start + rawPart.length,
       spaceBefore: prev ? start - prev.end : start,
+      id: genTokenId(rawPart, start),
     });
 
     return parsed;
@@ -38,8 +40,7 @@ export const interpret: Interpreter = (snap: ParsedSnapshot) => ({
   ...snap,
   interpreted: snap.parsed.map(token => ({
     ...token,
-    id: genTokenId(token),
-    ghost: false,
+    status: InterpretationResult.notRecognized
   })),
 });
 

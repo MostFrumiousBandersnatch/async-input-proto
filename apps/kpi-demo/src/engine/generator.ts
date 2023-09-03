@@ -3,8 +3,8 @@ import { Observable } from 'rxjs';
 import {
   AltGenerator,
   Injector,
-  makeInjectorOutOfNestedTemplate,
-  makeInjectorOutOfSnapshotPattern,
+  makeInjectorOutOfNestedTemplates,
+  cloneSnapshot
 } from '@async-input/parsing_lib';
 import {
   InterpretedSnapshot,
@@ -19,9 +19,7 @@ export const makeMulitpleResponseSequentialGenerator = <D>(
 ): ((snap: InterpretedSnapshot) => Observable<MultipleResponse<D>>) => {
   const wrappedOrigins = origins.map(origin => ({
     ...origin,
-    injector: Array.isArray(origin.pattern)
-      ? makeInjectorOutOfSnapshotPattern(origin.pattern)
-      : makeInjectorOutOfNestedTemplate(origin.pattern),
+    injector: makeInjectorOutOfNestedTemplates(origin.pattern),
   }));
 
   return snap =>
@@ -35,8 +33,10 @@ export const makeMulitpleResponseSequentialGenerator = <D>(
             break;
           }
 
-          const altSnap = origin.injector(snap);
-          if (altSnap !== snap) {
+          const snapCopy = cloneSnapshot(snap);
+
+          const altSnap = origin.injector(snapCopy);
+          if (altSnap !== snapCopy) {
             alternatives.push({
               name: origin.name,
               tokens: (postProcessor ? postProcessor(altSnap) : altSnap)
