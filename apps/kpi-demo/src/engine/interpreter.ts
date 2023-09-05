@@ -11,15 +11,23 @@ import {
 } from '@async-input/parsing_lib';
 
 import { makeMulitpleResponseSequentialGenerator } from 'engine/generator';
+import { InterpretedToken } from '@async-input/types';
 
 export interface KPIData {
   title: string;
   description?: string;
 }
 
-const getData = (name: string) => (snap: InterpretedSnapshot) => ({
-  title: `${name} of ${snap.interpreted[0].content}`,
-});
+const getData =
+  (name: string) =>
+  (snap: InterpretedSnapshot): KPIData => {
+    const key = snap.interpreted.find(
+      (token: InterpretedToken): boolean =>
+        token.role === 'key' && token.status === InterpretationResult.matched
+    )?.content;
+
+    return { title: key ? `${name} of ${key}` : `some ${name}` };
+  };
 
 const markMismatched = withTokenInjector(token =>
   token.status === InterpretationResult.misMatched
@@ -40,6 +48,14 @@ const markNotRecognized = withTokenInjector(token =>
     : token
 );
 
+const partMatched = withTokenInjector(token =>
+  token.status === InterpretationResult.partiallyMatched
+    ? {
+        ...token,
+        color: 'lightblue',
+      }
+    : token
+);
 const generator = makeMulitpleResponseSequentialGenerator(
   [
     {
@@ -90,7 +106,7 @@ const generator = makeMulitpleResponseSequentialGenerator(
       getData: getData('chart'),
     },
   ],
-  withInjectors([markMismatched, markNotRecognized])
+  withInjectors([markMismatched, markNotRecognized, partMatched])
 );
 
 export const KPIInterpreter: StreamMultiProcessor<KPIData> = raw => {

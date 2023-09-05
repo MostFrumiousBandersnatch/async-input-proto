@@ -7,7 +7,6 @@ import {
   InterpretedToken,
   MultipleResponse,
   NestedTemplateToken,
-  TemplateToken,
 } from '@async-input/types';
 
 import type { Injector } from './injector';
@@ -42,48 +41,6 @@ export const embelisher = (char: string): Injector<InterpretedSnapshot> =>
           ),
         }),
   }));
-
-// export const makeInjectorOutOfSnapshotPattern =
-//   (pattern: TemplateToken[]): Injector<InterpretedSnapshot> =>
-//   snap => {
-//     if (checkTokens(snap.interpreted, pattern)) {
-//       return {
-//         ...snap,
-//         interpreted: zipTokens(snap.interpreted, pattern),
-//       };
-//     } else return snap;
-//   };
-
-// export const makeInjectorOutOfNestedTemplate =
-//   (pattern: NestedTemplateToken): Injector<InterpretedSnapshot> =>
-//   snap => {
-//     const interpreted: InterpretedToken[] = [];
-
-//     const lastParsedNum = snap.interpreted.length - 1;
-//     let currParsedNum = 0;
-//     let specimen = pattern;
-
-//     while (specimen) {
-//       const token = snap.interpreted[currParsedNum];
-//       if (!checkToken(token, specimen, currParsedNum === lastParsedNum)) {
-//         return snap;
-//       } else {
-//         const prevToken = interpreted.at(-1);
-//         interpreted.push(
-//           token
-//             ? makeMaterializedToken(specimen, token)
-//             : makeGhostToken(specimen, (prevToken?.end || 0) + 1) //TODO: adjust to multiple spaces
-//         );
-//         specimen = shiftPattern(specimen, token);
-//         currParsedNum += 1;
-//       }
-//     }
-
-//     return {
-//       raw: snap.raw,
-//       interpreted,
-//     };
-//   };
 
 export interface AltGenerator<D> {
   name: string;
@@ -137,9 +94,7 @@ export const getDepth = (pattern: NestedTemplateToken): number =>
   1 + Math.max(0, ...Object.values(pattern.branches || {}).map(getDepth));
 
 interface InterimResult {
-  origin: NestedTemplateToken;
-  bestMatchPattern: NestedTemplateToken;
-
+  pattern: NestedTemplateToken;
   interpreted: InterpretedToken[];
   score: number;
   shift: number;
@@ -168,7 +123,6 @@ export const evaluateNestedTemplate = (
 
     while (specimen) {
       const token = tokens[currParsedNum] || genPostfix(interpreted.at(-1));
-      //console.log('~', tokens, currParsedNum, specimen);
 
       const result = evaluate(specimen, token);
 
@@ -188,8 +142,6 @@ export const evaluateNestedTemplate = (
 
     const score = estimateInterpretation(interpreted) / (shift + 1);
 
-    //console.log('@', shift, interpreted, score);
-
     if (score > bestScore) {
       bestScore = score;
       bestShift = shift;
@@ -200,8 +152,7 @@ export const evaluateNestedTemplate = (
   }
 
   return {
-    origin: pattern,
-    bestMatchPattern: bestPattern,
+    pattern: bestPattern,
     interpreted: bestInterpretation,
     size: bestMinSize,
     score: bestScore,
@@ -217,47 +168,47 @@ export const makeInjectorOutOfNestedTemplates =
       .filter(({ score }) => score >= 0)
       .sort(({ score: scoreA }, { score: scoreB }) => scoreB - scoreA);
 
-    const toBeSuggestedFirst: TemplateToken[] = [];
-    const toBeSuggestedSecond: TemplateToken[] = [];
-
-    const interpreted =
-      interim[0].score === 0
-        ? []
-        : interim.reduce((acc, res) => {
-            if (
-              acc
-                .slice(res.shift, res.size)
-                .every(({ status }) => status !== InterpretationResult.matched) //TODO: compare scores for edge cases
-            ) {
-              acc.splice(
-                res.shift,
-                res.size,
-                ...res.interpreted.slice(0, res.size)
-              );
-
-              if (res.bestMatchPattern) {
-                toBeSuggestedFirst.push(res.bestMatchPattern);
-              }
-            } else {
-              toBeSuggestedSecond.push(res.origin);
-            }
-
-            return acc;
-          }, snap.interpreted);
-
-    if (interpreted.length === 0) {
+    if (interim[0].score === 0) {
       return snap;
-    } else {
-      toBeSuggestedFirst.concat(toBeSuggestedSecond).forEach(pattern => {
-        const tail = genPostfix(interpreted.at(-1));
-        interpreted.push(evaluate(pattern, tail));
+    }
+
+    const termMap: boolean[] = [];
+    const tokenMap: number[] = [];
+
+    const interpreted = interim.reduce((acc, res, i) => {
+      res.interpreted.forEach((candidate, n) => {
+        const pos = res.shift + n;
+        const present = acc[pos];
+
+        if (candidate.status > present.status) {
+          if (tokenMap[pos] !== undefined) {
+            termMap[tokenMap[pos]] = false;
+          }
+
+          tokenMap[pos] = i;
+          termMap[i] = candidate.status !== InterpretationResult.matched;
+          acc.splice(pos, 1, candidate);
+        }
       });
 
-      return {
-        ...snap,
-        interpreted,
-      };
+      return acc;
+    }, snap.interpreted);
+
+    let i = 0;
+
+    while (i < interim.length) {
+      if (!termMap[i] && interim[i].pattern) {
+        const tail = genPostfix(interpreted.at(-1));
+        interpreted.push(evaluate(interim[i].pattern, tail));
+        break;
+      }
+      i += 1;
     }
+
+    return {
+      ...snap,
+      interpreted,
+    };
   };
 
 export const cloneSnapshot = (

@@ -133,21 +133,25 @@ export const evaluate = (
       : token.content;
   const position = token.start;
 
-  let variants =
-    (status === InterpretationResult.suggested || specimen.variants?.length > 1)
-      ? specimen.variants
-      : [];
+  let variants: string[];
 
-  if (status === InterpretationResult.partiallyMatched) {
-    variants = variants?.filter(
-      text => text.startsWith(content) && text !== content
-    );
+  switch (status) {
+    case InterpretationResult.misMatched:
+    case InterpretationResult.suggested:
+      variants = [...specimen.variants];
+      break;
+    case InterpretationResult.partiallyMatched:
+      variants = specimen.variants?.filter(
+        text => text.startsWith(content) && text !== content
+      );
+      break;
+    default:
+      variants = [];
   }
 
   return {
     role: specimen.role,
-    color:
-      status === InterpretationResult.misMatched ? undefined : specimen.color,
+    color: specimen.color,
     variants,
     id: token.id,
     content,

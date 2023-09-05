@@ -32,7 +32,6 @@ export const makeMulitpleResponseSequentialGenerator = <D>(
           if (runState.stop) {
             break;
           }
-
           const snapCopy = cloneSnapshot(snap);
 
           const altSnap = origin.injector(snapCopy);
@@ -41,7 +40,7 @@ export const makeMulitpleResponseSequentialGenerator = <D>(
               name: origin.name,
               tokens: (postProcessor ? postProcessor(altSnap) : altSnap)
                 .interpreted,
-              data: origin.getData(snap),
+              data: origin.getData(altSnap),
             });
             subscriber.next({ raw: snap.raw, alternatives });
 

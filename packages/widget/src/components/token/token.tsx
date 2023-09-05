@@ -53,7 +53,7 @@ export const Token = ({
             color: debug ? 'inherit' : 'transparent',
             clipPath: genClipPath(role),
             //to show role correctly
-            ...(!ghost && role ? { minWidth: `${role.length * 7 + 5}px` } : {}),
+            ...(!ghost && role ? { minWidth: `${getRoleWidth(role)}px` } : {}),
           }}
         >
           {content}

@@ -38,11 +38,11 @@ export interface NestedTemplateToken extends TemplateToken {
 export const DEFAULT_BRANCH = '__default';
 
 export enum InterpretationResult {
-  notRecognized = 'notRecognized',
-  matched = 'matched',
-  misMatched = 'misMatched',
-  partiallyMatched = 'partiallyMatched',
-  suggested = 'suggested',
+  notRecognized = 0,
+  matched = 4,
+  misMatched = 1,
+  partiallyMatched = 3,
+  suggested = 2,
 }
 
 export interface InterpretedToken

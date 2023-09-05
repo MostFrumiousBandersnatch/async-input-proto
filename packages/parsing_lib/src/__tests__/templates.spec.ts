@@ -1,4 +1,4 @@
-import { DEFAULT_BRANCH, NestedTemplateToken } from '@async-input/types';
+import { DEFAULT_BRANCH, InterpretationResult, NestedTemplateToken } from '@async-input/types';
 import { defaultInterpret } from 'tokenizer';
 import {
   evaluateNestedTemplate,
@@ -62,7 +62,7 @@ describe('non-linear analysis', () => {
     const snap = defaultInterpret('cpm google');
 
     const interim = evaluateNestedTemplate(templates[0], snap);
-    //console.log(JSON.stringify(interim, null, 2));
+
     expect(interim.shift).toBe(0);
   });
 
@@ -70,7 +70,7 @@ describe('non-linear analysis', () => {
     const snap = defaultInterpret('cpm google');
 
     const interim = evaluateNestedTemplate(templates[1], snap);
-    //console.log(JSON.stringify(interim, null, 2));
+
     expect(interim.shift).toBe(1);
   });
 
@@ -87,7 +87,7 @@ describe('non-linear analysis', () => {
       role: 'key',
       id: 'roi_0',
       content: 'roi',
-      status: 'matched',
+      status: InterpretationResult.matched,
       spaceBefore: 0,
       start: 0,
       end: 3,
@@ -101,7 +101,7 @@ describe('non-linear analysis', () => {
       role: 'data source',
       id: 'google_0',
       content: 'google',
-      status: 'matched',
+      status: InterpretationResult.matched,
       spaceBefore: 0,
       start: 0,
       end: 6,
@@ -115,7 +115,7 @@ describe('non-linear analysis', () => {
       role: 'key',
       content: 'cpm',
       id: 'cpm_0',
-      status: 'matched',
+      status: InterpretationResult.matched,
       spaceBefore: 0,
       start: 0,
       end: 3,
@@ -124,7 +124,7 @@ describe('non-linear analysis', () => {
       role: 'data source',
       content: 'google',
       id: 'google_4',
-      status: 'matched',
+      status: InterpretationResult.matched,
       spaceBefore: 1,
       start: 4,
       end: 10,
@@ -132,7 +132,7 @@ describe('non-linear analysis', () => {
     expect(snap.interpreted[2]).toMatchObject({
       role: 'target',
       content: '        ',
-      status: 'suggested',
+      status: InterpretationResult.suggested,
       spaceBefore: 1,
       start: 11,
       end: 19,
@@ -146,7 +146,7 @@ describe('non-linear analysis', () => {
     expect(snap.interpreted[0]).toMatchObject({
       role: 'data source',
       content: 'google',
-      status: 'matched',
+      status: InterpretationResult.matched,
       spaceBefore: 0,
       start: 0,
       end: 6,
@@ -155,7 +155,7 @@ describe('non-linear analysis', () => {
     expect(snap.interpreted[1]).toMatchObject({
       role: 'key',
       content: 'cpm',
-      status: 'matched',
+      status: InterpretationResult.matched,
       spaceBefore: 1,
       start: 7,
       end: 10,
@@ -170,7 +170,7 @@ describe('non-linear analysis', () => {
       role: 'data source',
       content: 'google',
       id: 'google_0',
-      status: 'matched',
+      status: InterpretationResult.matched,
       spaceBefore: 0,
       start: 0,
       end: 6,
@@ -179,7 +179,7 @@ describe('non-linear analysis', () => {
     expect(snap.interpreted[1]).toMatchObject({
       role: 'target',
       content: 'looker',
-      status: 'matched',
+      status: InterpretationResult.matched,
       spaceBefore: 1,
       start: 7,
       end: 13,
@@ -188,7 +188,7 @@ describe('non-linear analysis', () => {
     expect(snap.interpreted[2]).toMatchObject({
       role: 'key',
       content: 'cpm',
-      status: 'matched',
+      status: InterpretationResult.matched,
       spaceBefore: 1,
       start: 14,
       end: 17,
@@ -201,7 +201,7 @@ describe('non-linear analysis', () => {
     expect(snap.interpreted[0]).toMatchObject({
       role: 'data source',
       content: 'goo',
-      status: 'partiallyMatched',
+      status: InterpretationResult.partiallyMatched,
       spaceBefore: 0,
       start: 0,
       end: 3,
@@ -210,7 +210,7 @@ describe('non-linear analysis', () => {
     expect(snap.interpreted[1]).toMatchObject({
       role: 'key',
       content: 'cpm',
-      status: 'matched',
+      status: InterpretationResult.matched,
       spaceBefore: 1,
       start: 4,
       end: 7,
