@@ -63,7 +63,7 @@ describe('non-linear analysis', () => {
 
     const interim = evaluateNestedTemplate(templates[0], snap);
 
-    expect(interim.shift).toBe(0);
+    expect(interim.result[0][0]).toBe(0);
   });
 
   it('evaluates second', () => {
@@ -71,13 +71,13 @@ describe('non-linear analysis', () => {
 
     const interim = evaluateNestedTemplate(templates[1], snap);
 
-    expect(interim.shift).toBe(1);
+    expect(interim.result[0][0]).toBe(1);
   });
 
   it('evaluates first standing second', () => {
     const snap = defaultInterpret('fff roi');
     const interim = evaluateNestedTemplate(templates[0], snap);
-    expect(interim.shift).toBe(1);
+    expect(interim.result[0][0]).toBe(1);
   });
 
   it('recognizes first', () => {

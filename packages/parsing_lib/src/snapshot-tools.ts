@@ -95,98 +95,94 @@ export const getDepth = (pattern: NestedTemplateToken): number =>
 
 interface InterimResult {
   pattern: NestedTemplateToken;
-  interpreted: InterpretedToken[];
+  result: [number, InterpretedToken][];
   score: number;
-  shift: number;
-  size: number;
+  terminate: boolean;
 }
 
-const MAX_INTERPRETATION_DEPTH = 10;
+//TODO: count on size and distance
+const estimateInterimResult = (variant: InterimResult): number => variant.score;
 
 export const evaluateNestedTemplate = (
   pattern: NestedTemplateToken,
   snap: InterpretedSnapshot
 ): InterimResult => {
-  const patternDepth = getDepth(pattern); //TODO: use memoization
-  const combCount = Math.min(MAX_INTERPRETATION_DEPTH, snap.interpreted.length);
-  let bestShift;
-  let bestMinSize;
-  let bestScore = 0;
-  let bestInterpretation: InterpretedToken[] = [];
-  let bestPattern = pattern;
+  const active: InterimResult[] = [
+    {
+      pattern,
+      result: [],
+      score: 0,
+      terminate: false,
+    },
+  ];
 
-  for (let shift = 0; shift < combCount; shift += 1) {
-    const tokens = snap.interpreted.slice(shift, shift + patternDepth);
-    const interpreted: InterpretedToken[] = [];
-    let currParsedNum = 0;
-    let specimen = pattern;
+  const output: InterimResult[] = [];
 
-    while (specimen) {
-      const token = tokens[currParsedNum] || genPostfix(interpreted.at(-1));
+  snap.interpreted.forEach((token, num) => {
+    active.forEach(variant => {
+      const currMatch = evaluate(variant.pattern, token);
+      const terminate = currMatch.status !== InterpretationResult.matched;
 
-      const result = evaluate(specimen, token);
+      const newVariant: InterimResult = {
+        pattern: terminate
+          ? variant.pattern
+          : shiftPattern(variant.pattern, currMatch),
+        result: [...variant.result, [num, currMatch]],
+        score: variant.score + estimateToken(currMatch),
+        terminate,
+      };
 
-      if (result.status !== InterpretationResult.suggested) {
-        interpreted.push(result);
-
-        if (result.status !== InterpretationResult.misMatched) {
-          specimen = shiftPattern(specimen, token);
-          currParsedNum += 1;
+      if (!terminate) {
+        if (newVariant.pattern === null) {
+          output.push(newVariant);
         } else {
-          break;
+          active.push(newVariant);
         }
-      } else {
-        break;
+      } else if (newVariant.score > 0) {
+        output.push(newVariant);
       }
-    }
+    });
+  });
 
-    const score = estimateInterpretation(interpreted) / (shift + 1);
+  let bestVariant: InterimResult = active[0];
+  let bestScore = estimateInterimResult(bestVariant);
+  active
+    .slice(1)
+    .concat(output)
+    .forEach(variant => {
+      const currScore = estimateInterimResult(variant);
+      if (currScore > bestScore) {
+        bestScore = currScore;
+        bestVariant = variant;
+      }
+    });
 
-    if (score > bestScore) {
-      bestScore = score;
-      bestShift = shift;
-      bestMinSize = currParsedNum;
-      bestInterpretation = interpreted;
-      bestPattern = specimen;
-    }
-  }
-
-  return {
-    pattern: bestPattern,
-    interpreted: bestInterpretation,
-    size: bestMinSize,
-    score: bestScore,
-    shift: bestShift,
-  };
+  return bestVariant;
 };
 
 export const makeInjectorOutOfNestedTemplates =
   (templates: NestedTemplateToken[]): Injector<InterpretedSnapshot> =>
   snap => {
+    // Fetching and prioritizing variants
     const interim = templates
       .map(tmpl => evaluateNestedTemplate(tmpl, snap))
       .filter(({ score }) => score >= 0)
-      .sort(({ score: scoreA }, { score: scoreB }) => scoreB - scoreA);
+      .sort(
+        (resA, resB) =>
+          estimateInterimResult(resB) - estimateInterimResult(resA)
+      );
 
     if (interim[0].score === 0) {
+      //No good variants
       return snap;
     }
 
-    const termMap: boolean[] = [];
-    const tokenMap: number[] = [];
-
+    //Merging them together according the priorities
     const interpreted = interim.reduce((acc, res, i) => {
-      res.interpreted.forEach((candidate, n) => {
-        const pos = res.shift + n;
+      res.result.forEach(([pos, candidate]) => {
         const present = acc[pos];
 
         if (candidate.status > present.status) {
-          if (tokenMap[pos] !== undefined) {
-            termMap[tokenMap[pos]] = false;
-          }
-
-          tokenMap[pos] = i;
-          termMap[i] = candidate.status !== InterpretationResult.matched;
           acc.splice(pos, 1, candidate);
         }
       });
@@ -196,10 +192,12 @@ export const makeInjectorOutOfNestedTemplates =
 
     let i = 0;
 
+    // Making suggestions for those who cares
     while (i < interim.length) {
-      if (!termMap[i] && interim[i].pattern) {
+      const res = interim[i];
+      if (!res.terminate && res.pattern) {
         const tail = genPostfix(interpreted.at(-1));
-        interpreted.push(evaluate(interim[i].pattern, tail));
+        interpreted.push(evaluate(res.pattern, tail));
         break;
       }
       i += 1;
