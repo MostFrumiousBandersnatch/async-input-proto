@@ -23,46 +23,6 @@ const getStubLength = (specimen: TemplateToken) =>
 const getStubContent = (specimen: TemplateToken) =>
   repeat(' ', getStubLength(specimen)).join('');
 
-// export const makeGhostToken = (
-//   specimen: TemplateToken,
-//   position: number
-// ): InterpretedToken => {
-//   const content = getStubContent(specimen);
-
-//   return {
-//     ...specimen,
-//     content,
-//     spaceBefore: 1,
-//     start: position,
-//     end: position + content.length,
-//     ghost: true,
-//   };
-// };
-
-// export const makeMaterializedToken = (
-//   specimen: TemplateToken,
-//   token: ParsedToken
-// ): InterpretedToken => {
-//   return {
-//     ...specimen,
-//     ...token,
-//     ghost: false,
-//   };
-// };
-
-// export const zipTokens = (
-//   source: ParsedToken[],
-//   pattern: TemplateToken[]
-// ): InterpretedToken[] =>
-//   pattern.reduce((acc, specimen, n) => {
-//     const parsed = source[n];
-//     const token = parsed
-//       ? makeMaterializedToken(specimen, parsed)
-//       : makeGhostToken(specimen, (acc.at(-1)?.end || 0) + 1);
-//     acc.push(token);
-//     return acc;
-//   }, []);
-
 export const checkToken = (
   specimen: TemplateToken,
   token: ParsedToken
@@ -81,7 +41,7 @@ export const checkToken = (
 
 const scoreMap: Record<InterpretationResult, number> = {
   [InterpretationResult.matched]: 1,
-  [InterpretationResult.misMatched]: -0.5,
+  [InterpretationResult.misMatched]: 0.25,
   [InterpretationResult.partiallyMatched]: 0.5,
   [InterpretationResult.suggested]: 0.1,
   [InterpretationResult.notRecognized]: 0,
