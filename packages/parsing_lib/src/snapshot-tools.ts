@@ -19,7 +19,6 @@ import {
   estimateToken,
   evaluate,
   genPostfix,
-  getDefualtSuggestion,
   shiftPattern,
 } from 'token-tools';
 
@@ -178,14 +177,14 @@ export const makeInjectorOutOfNestedTemplates =
     }
 
     //Merging them together according the priorities
-    const coverageMap = Array(snap.interpreted.length);
+    const coverageMap: Record<string, number> = {};
     const interpreted = interim.reduce((acc, res, i) => {
       res.result.forEach(([pos, candidate]) => {
         const present = acc[pos];
 
         if (candidate.status > present.status) {
           acc.splice(pos, 1, candidate);
-          coverageMap[pos] = i;
+          coverageMap[candidate.role] = i;
         }
       });
 
@@ -197,12 +196,16 @@ export const makeInjectorOutOfNestedTemplates =
     // Making suggestions for those who cares
     while (i < interim.length) {
       const res = interim[i];
-      const present = coverageMap.some(j => j == i);
-      if ((!res.terminate || !present) && res.pattern) {
-        const tail = genPostfix(interpreted.at(-1));
-        interpreted.push(evaluate(res.pattern, tail));
-        break;
+      if (res.pattern) {
+        const present = coverageMap[res.pattern.role];
+        //this alternative is not present at all either present partially
+        if (present === undefined || (!res.terminate && present === i)) {
+          const tail = genPostfix(interpreted.at(-1));
+          interpreted.push(evaluate(res.pattern, tail));
+          break;
+        }
       }
+
       i += 1;
     }
 

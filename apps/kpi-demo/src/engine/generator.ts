@@ -4,12 +4,10 @@ import {
   AltGenerator,
   Injector,
   makeInjectorOutOfNestedTemplates,
-  cloneSnapshot
+  cloneSnapshot,
+  invertNestedTemplate,
 } from '@async-input/parsing_lib';
-import {
-  InterpretedSnapshot,
-  MultipleResponse,
-} from '@async-input/types';
+import { InterpretedSnapshot, MultipleResponse } from '@async-input/types';
 import { delay } from 'utils/async';
 
 export const makeMulitpleResponseSequentialGenerator = <D>(
@@ -19,7 +17,9 @@ export const makeMulitpleResponseSequentialGenerator = <D>(
 ): ((snap: InterpretedSnapshot) => Observable<MultipleResponse<D>>) => {
   const wrappedOrigins = origins.map(origin => ({
     ...origin,
-    injector: makeInjectorOutOfNestedTemplates(origin.pattern),
+    injector: makeInjectorOutOfNestedTemplates(
+      origin.pattern.flatMap(template => invertNestedTemplate(template))
+    ),
   }));
 
   return snap =>

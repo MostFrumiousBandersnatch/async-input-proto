@@ -17,22 +17,22 @@ export const colorizeToken =
     ...token,
   });
 
-const getStubLength = (specimen: TemplateToken) =>
-  Math.ceil(specimen.role.length * 1.2);
+const getStubLength = (pattern: TemplateToken) =>
+  Math.ceil(pattern.role.length * 1.2);
 
-const getStubContent = (specimen: TemplateToken) =>
-  repeat(' ', getStubLength(specimen)).join('');
+const getStubContent = (pattern: TemplateToken) =>
+  repeat(' ', getStubLength(pattern)).join('');
 
 export const checkToken = (
-  specimen: TemplateToken,
+  pattern: TemplateToken,
   token: ParsedToken
 ): InterpretationResult => {
   switch (true) {
     case !token.content:
       return InterpretationResult.suggested;
-    case specimen.variants.includes(token.content):
+    case pattern.variants.includes(token.content):
       return InterpretationResult.matched;
-    case specimen.variants.some(v => v.startsWith(token.content)):
+    case pattern.variants.some(v => v.startsWith(token.content)):
       return InterpretationResult.partiallyMatched;
     default:
       return InterpretationResult.misMatched;
@@ -41,7 +41,7 @@ export const checkToken = (
 
 const scoreMap: Record<InterpretationResult, number> = {
   [InterpretationResult.matched]: 1,
-  [InterpretationResult.misMatched]: 0.25,
+  [InterpretationResult.misMatched]: -0.25,
   [InterpretationResult.partiallyMatched]: 0.5,
   [InterpretationResult.suggested]: 0.1,
   [InterpretationResult.notRecognized]: 0,
@@ -83,13 +83,13 @@ export const genPostfix = (token?: ParsedToken): ParsedToken =>
       };
 
 export const evaluate = (
-  specimen: TemplateToken,
+  pattern: TemplateToken,
   token: ParsedToken
 ): InterpretedToken => {
-  const status = checkToken(specimen, token);
+  const status = checkToken(pattern, token);
   const content =
     status === InterpretationResult.suggested
-      ? getStubContent(specimen)
+      ? getStubContent(pattern)
       : token.content;
   const position = token.start;
 
@@ -98,10 +98,10 @@ export const evaluate = (
   switch (status) {
     case InterpretationResult.misMatched:
     case InterpretationResult.suggested:
-      variants = [...specimen.variants];
+      variants = [...pattern.variants];
       break;
     case InterpretationResult.partiallyMatched:
-      variants = specimen.variants?.filter(
+      variants = pattern.variants?.filter(
         text => text.startsWith(content) && text !== content
       );
       break;
@@ -110,8 +110,8 @@ export const evaluate = (
   }
 
   return {
-    role: specimen.role,
-    color: specimen.color,
+    role: pattern.role,
+    color: pattern.color,
     variants,
     id: token.id,
     content,
@@ -122,5 +122,21 @@ export const evaluate = (
   };
 };
 
-export const getDefualtSuggestion = (pattern: TemplateToken) =>
-  evaluate(pattern, genPostfix());
+export const invertNestedTemplate = (
+  pattern: NestedTemplateToken,
+  base?: NestedTemplateToken
+): NestedTemplateToken[] => [
+  base ?
+    { ...pattern, branches: { [DEFAULT_BRANCH]: base } }
+    : pattern,
+  ...Object.entries(pattern.branches || {}).flatMap(
+    ([branch, subpattern]) =>
+      invertNestedTemplate(
+        subpattern, {
+          ...pattern,
+          variants: [branch],
+          branches: base ? { [DEFAULT_BRANCH]: base } : undefined,
+        }
+      )
+  ),
+];
