@@ -41,7 +41,7 @@ export const checkToken = (
 
 const scoreMap: Record<InterpretationResult, number> = {
   [InterpretationResult.matched]: 1,
-  [InterpretationResult.misMatched]: -0.25,
+  [InterpretationResult.misMatched]: 0.25,
   [InterpretationResult.partiallyMatched]: 0.5,
   [InterpretationResult.suggested]: 0.1,
   [InterpretationResult.notRecognized]: 0,

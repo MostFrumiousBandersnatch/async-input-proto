@@ -171,7 +171,7 @@ export const makeInjectorOutOfNestedTemplates =
           estimateInterimResult(resB) - estimateInterimResult(resA)
       );
 
-    if (interim[0].score === 0) {
+    if (interim[0].score <= 0.25) {
       //No good variants
       return snap;
     }
@@ -179,14 +179,17 @@ export const makeInjectorOutOfNestedTemplates =
     //Merging them together according the priorities
     const coverageMap: Record<string, number> = {};
     const interpreted = interim.reduce((acc, res, i) => {
-      res.result.forEach(([pos, candidate]) => {
+      for (let entry of res.result) {
+        let [pos, candidate] = entry;
         const present = acc[pos];
 
-        if (candidate.status > present.status) {
+        if (present.status === InterpretationResult.notRecognized) {
           acc.splice(pos, 1, candidate);
           coverageMap[candidate.role] = i;
+        } else {
+          break;
         }
-      });
+      }
 
       return acc;
     }, snap.interpreted);
@@ -198,7 +201,6 @@ export const makeInjectorOutOfNestedTemplates =
       const res = interim[i];
       if (res.pattern) {
         const present = coverageMap[res.pattern.role];
-        //this alternative is not present at all either present partially
         if (present === undefined || (!res.terminate && present === i)) {
           const tail = genPostfix(interpreted.at(-1));
           interpreted.push(evaluate(res.pattern, tail));
