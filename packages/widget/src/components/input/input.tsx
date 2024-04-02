@@ -100,7 +100,7 @@ export const Input = React.memo(function Input({
 
   const onKeyDown = useCallback(
     (evt: KeyboardEvent<HTMLInputElement>) => {
-      if (inputRef.current && currVariants?.length > 0) {
+      if (inputRef.current && currVariants?.length > 0 && evt.key === evt.code) {
         switch (evt.code) {
           case 'ArrowUp':
             evt.preventDefault();
